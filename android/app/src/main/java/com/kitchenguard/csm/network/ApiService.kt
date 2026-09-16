@@ -20,6 +20,9 @@ interface ApiService {
 
     @POST("api/ocr/scan-scale")
     fun scanScale(@Body request: OCRScaleRequest): Call<OCRScaleResponse>
+
+    @POST("api/waste-log/analyze")
+    fun submitWasteLog(@Body request: WasteLogSubmissionRequest): Call<WasteLogSubmissionResponse>
 }
 
 object RetrofitClient {

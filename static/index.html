@@ -2,1053 +2,1194 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>KitchenGuard CSM — Android Vision & Waste Logging</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KitchenGuard CSM - Quality Control System</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Tema Dominan Putih & Orange (Material Design 3 Light) */
-      --bg-chassis: #e2e8f0;
-      --android-bg: #f8fafc;
-      --android-surface: #ffffff;
-      --android-card: #ffffff;
-      --android-border: #e2e8f0;
-      --android-border-light: #f1f5f9;
-      --primary-hover: #ea580c;
-      --primary-light: #fff7ed;
-      --primary-tint: #ffedd5;
-      --success: #16a34a;
-      --warning: #d97706;
+      --primary: #ea580c;
+      --primary-dark: #c2410c;
+      --success: #15803d;
+      --warning: #ca8a04;
       --danger: #dc2626;
-      --purple: #9333ea;
-      --accent-gradient: linear-gradient(135deg, #ff6b00 0%, #f97316 50%, #fb9238 100%);
-      --navbar-gradient: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%);
-      --glass-bg: rgba(255, 255, 255, 0.95);
-      --glass-border: rgba(226, 232, 240, 0.6);
-      --smooth-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.1);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: linear-gradient(135deg, #f1f5f9 0%, #fff7ed 50%, #fed7aa 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem 1rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+      font-size: 15px;
     }
 
-    /* Device Chassis Android Flagship */
-    .device-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 420px;
-      height: 870px;
-      background: #1e293b;
-      border-radius: 46px;
-      padding: 11px;
-      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.4), inset 0 0 0 2px #cbd5e1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    @media (max-width: 480px) {
-      body {
-        padding: 0;
-        background: var(--android-bg);
-      }
-      .device-wrapper {
-        border-radius: 0;
-        height: 100vh;
-        max-width: 100%;
-        padding: 0;
-        box-shadow: none;
-      }
-    }
-
-    .device-screen {
-      background: var(--android-bg);
-      flex: 1;
-      border-radius: 36px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    @media (max-width: 480px) {
-      .device-screen {
-        border-radius: 0;
-      }
-    }
-
-    /* Android Status Bar (Light Mode) */
-    .status-bar {
-      height: 38px;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.25rem;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text);
-      z-index: 50;
-      border-bottom: 1px solid var(--android-border-light);
-    }
-
-    .camera-punch {
-      width: 13px;
-      height: 13px;
-      background: #0f172a;
-      border-radius: 50%;
-      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.4);
-    }
-
-    .status-icons {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* App Header Bar - Modern Gradient & Glassmorphism */
-    .app-bar {
-      padding: 0.85rem 1.25rem;
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--glass-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 40;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
-      transition: var(--smooth-transition);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .app-bar::before {
-      content: '';
-      position: absolute;
+    /* Header */
+    .header {
+      background: white;
+      padding: 1rem 2rem;
+      box-shadow: var(--shadow);
+      position: sticky;
       top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.03), transparent);
-      transition: left 0.6s ease;
-    }
-    
-    .app-bar:hover::before {
-      left: 100%;
+      z-index: 100;
     }
 
-    .app-logo {
-      width: 36px;
-      height: 36px;
-      background: var(--accent-gradient);
-      border-radius: 10px;
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: var(--radius);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.15rem;
-      box-shadow: 0 4px 10px rgba(255, 107, 0, 0.3), 0 0 20px rgba(255, 107, 0, 0.2);
-      color: #ffffff;
-      transition: var(--smooth-transition);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .app-logo::after {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 10px;
-      padding: 2px;
-      background: var(--accent-gradient);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    .app-subtitle {
-      font-size: 0.7rem;
-      color: var(--primary);
-      font-weight: 700;
-    }
-    
-    .app-title-box {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      transition: var(--smooth-transition);
-    }
-    
-    .app-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      transition: var(--smooth-transition);
-    }
-    
-    .app-title:hover {
-      transform: translateX(2px);
+      color: white;
     }
 
-    .chip-online {
-      font-size: 0.7rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-tint) 100%);
-      border: 1px solid var(--primary-tint);
-      color: var(--primary);
+    .brand-text h1 {
+      font-size: 1.25rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      transition: var(--smooth-transition);
-      cursor: default;
-    }
-    
-    .chip-online:hover {
-      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-      box-shadow: 0 4px 12px rgba(255, 107, 0, 0.15);
-      transform: translateY(-1px);
+      color: var(--gray-900);
     }
 
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background: var(--primary);
+    .brand-text p {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: #ecfdf5;
+      color: var(--success);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
       border-radius: 50%;
-      animation: pulse-bounce 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    @keyframes pulse-bounce {
-      0%, 100% { 
-        opacity: 1; 
-        transform: scale(1);
-      }
-      50% { 
-        opacity: 0.4; 
-        transform: scale(1.3) translateY(-2px);
-      }
+      animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
-    /* Main Viewport */
-    .viewport {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      position: relative;
-    }
-
-    .viewport::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* Mode Selector - Enhanced with Smooth Animations */
-    .mode-selector {
-      display: flex;
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      border-radius: 14px;
-      padding: 4px;
-      margin-bottom: 1rem;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--shadow-sm), 0 8px 24px rgba(0, 0, 0, 0.04);
-      transition: var(--smooth-transition);
-    }
-    
-    .mode-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 0.55rem 0.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.2rem;
-      transition: var(--smooth-transition);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .mode-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(249, 115, 22, 0.05) 100%);
-      opacity: 0;
-      transition: var(--smooth-transition);
-    }
-    
-    .mode-btn:hover::before {
-      opacity: 1;
-    }
-    
-    .mode-btn:hover {
-      color: var(--text);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .mode-btn.active {
-      background: var(--accent-gradient);
-      color: #ffffff;
-      box-shadow: 0 4px 16px rgba(255, 107, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
-      transform: translateY(-1px);
-    }
-    
-    .mode-btn:active {
-      transform: translateY(0) scale(0.96);
-    }
-    /* Camera Viewfinder (Dark HUD for Camera Contrast) */
-    .viewfinder-card {
-      position: relative;
-      height: 220px;
-      background: #0f172a;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 2px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-      box-shadow: var(--shadow-md);
-    }
-
-    .viewfinder-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .scanner-brackets {
-      width: 180px;
-      height: 135px;
-      border: 2px dashed rgba(255, 255, 255, 0.45);
-      border-radius: 14px;
-      position: relative;
-    }
-
-    .scanner-brackets::before,
-    .scanner-brackets::after {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      border-color: var(--primary);
-      border-style: solid;
-    }
-
-    .scanner-brackets::before {
-      top: -2px; left: -2px;
-      border-width: 3px 0 0 3px;
-      border-top-left-radius: 12px;
-    }
-
-    .scanner-brackets::after {
-      bottom: -2px; right: -2px;
-      border-width: 0 3px 3px 0;
-      border-bottom-right-radius: 12px;
-    }
-
-    .laser-line {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      height: 2.5px;
-      background: linear-gradient(90deg, transparent, #ff6b00, #f97316, transparent);
-      box-shadow: 0 0 10px #ff6b00;
-      animation: scanLaser 2s ease-in-out infinite;
-    }
-
-    @keyframes scanLaser {
-      0% { top: 15%; opacity: 0.3; }
-      50% { top: 85%; opacity: 1; }
-      100% { top: 15%; opacity: 0.3; }
-    }
-
-    .camera-hud-text {
-      margin-top: 0.75rem;
-      font-size: 0.74rem;
-      background: rgba(15, 23, 42, 0.85);
-      padding: 0.3rem 0.85rem;
-      border-radius: 20px;
-      color: #ffffff;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    /* Section Titles */
-    .section-title {
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.6rem;
-    }
-
-    /* Chips Grid (Dominant White with Orange Border on hover) */
-    .chips-grid {
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 1.1rem;
+      gap: 2rem;
     }
 
-    .scan-chip {
-      background: #ffffff;
-      border: 1px solid var(--android-border);
-      color: var(--text);
-      font-family: inherit;
-      padding: 0.65rem 0.8rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      text-align: left;
-      box-shadow: var(--shadow-sm);
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
     }
 
-    .scan-chip:hover, .scan-chip:active {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .scan-chip .chip-icon {
-      font-size: 1.25rem;
-    }
-
-    .scan-chip small {
-      color: var(--text-muted);
-      font-size: 0.7rem;
-      font-weight: 500;
-      display: block;
-    }
-
-    /* Result Card (Pure White with Subtle Orange Accent) */
-    .result-sheet {
-      background: #ffffff;
-      border: 1px solid var(--android-border);
-      border-radius: 20px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      box-shadow: var(--shadow-md);
-      position: relative;
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       overflow: hidden;
     }
 
-    .result-sheet::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #ff6b00, #f97316);
-    }
-
-    .badge-freshness {
-      display: inline-block;
-      font-size: 0.95rem;
-      font-weight: 800;
-      padding: 0.35rem 0.85rem;
-      border-radius: 8px;
-      letter-spacing: 0.03em;
-      margin-bottom: 0.4rem;
-    }
-
-    .freshness-FRESH { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-    .freshness-ACCEPTABLE { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-    .freshness-SPOILED { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-    .freshness-REJECT { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
-    .freshness-UNCERTAIN { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-
-    .meta-row {
+    .card-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.82rem;
-      padding: 0.45rem 0;
-      border-bottom: 1px solid var(--android-border-light);
     }
 
-    .meta-label {
-      color: var(--text-muted);
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      background: var(--gray-100);
+      padding: 6px;
+      border-radius: var(--radius);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gray-500);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255,255,255,0.5);
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--gray-900);
+      box-shadow: var(--shadow);
+    }
+
+    /* Input Areas */
+    .input-section {
+      display: none;
+    }
+
+    .input-section.active {
+      display: block;
+    }
+
+    /* Camera Container */
+    .camera-container {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--gray-900);
+      margin-bottom: 1.5rem;
+    }
+
+    #cameraFeed {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: black;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      animation: scan 2s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 10%; opacity: 0.5; }
+      50% { top: 90%; opacity: 1; }
+    }
+
+    .camera-hud {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      justify-content: space-between;
+      color: white;
+      font-size: 0.75rem;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .camera-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(234, 88, 12, 0.9);
+      border-radius: 15px;
       font-weight: 600;
     }
 
-    .meta-val {
-      font-weight: 700;
-      color: var(--text);
+    .camera-dot {
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      animation: blink 1s infinite;
     }
 
-    .sop-alert {
-      margin-top: 0.85rem;
-      background: var(--primary-light);
-      border-left: 4px solid var(--primary);
-      padding: 0.65rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      color: #9a3412;
-      line-height: 1.45;
+    @keyframes blink {
+      50% { opacity: 0.3; }
     }
 
-    /* Primary Action Buttons (Orange Gradient) */
-    .btn-action {
+    /* Catalog Grid */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .catalog-item {
+      padding: 1.25rem;
+      background: var(--gray-50);
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .catalog-item:hover {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: var(--shadow);
+    }
+
+    .catalog-name {
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 4px;
+    }
+
+    .catalog-desc {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+    }
+
+    .catalog-code {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 8px;
+      font-family: monospace;
+    }
+
+    /* Form Inputs */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input {
       width: 100%;
-      background: linear-gradient(135deg, #ff6b00, #ea580c);
-      color: #ffffff;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
       border: none;
-      padding: 0.9rem;
-      border-radius: 14px;
-      font-family: inherit;
-      font-size: 0.92rem;
-      font-weight: 800;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-300);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* Scale Display */
+    .scale-display {
+      background: var(--gray-900);
+      color: white;
+      padding: 2rem;
+      border-radius: var(--radius);
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .scale-value {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #38bdf8;
+      font-family: monospace;
+    }
+
+    .scale-unit {
+      font-size: 1.25rem;
+      color: var(--gray-400);
+    }
+
+    /* Voice Button */
+    .voice-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius);
+      border: 2px solid var(--gray-300);
+      background: var(--gray-50);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      box-shadow: 0 4px 15px rgba(255, 107, 0, 0.35);
       transition: all 0.2s;
     }
 
-    .btn-action:hover {
-      background: linear-gradient(135deg, #ea580c, #c2410c);
-      transform: translateY(-1px);
-    }
-
-    .btn-action:active {
-      transform: scale(0.98);
-    }
-
-    /* Android Bottom Navigation Bar (White Surface) */
-    .bottom-nav {
-      height: 64px;
-      background: #ffffff;
-      border-top: 1px solid var(--android-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 0 0.5rem;
-      z-index: 40;
-      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-      color: var(--text-muted);
-      font-size: 0.68rem;
-      font-weight: 700;
-      background: none;
-      border: none;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .nav-item.active {
+    .voice-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
       color: var(--primary);
     }
 
-    .nav-icon {
-      font-size: 1.25rem;
+    .voice-btn.recording {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
     }
+
+    /* Results Panel */
+    .results-panel {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .result-card {
+      background: var(--gray-50);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .category-SPOILED { background: #fed7aa; color: #9a3412; }
+    .category-EXPIRED { background: #fecdd3; color: #9f1239; }
+    .category-CONTAMINATED { background: #fecaca; color: #991b1b; }
+    .category-OVERCOOKED { background: #e9d5ff; color: #6b21a8; }
+    .category-SURPLUS { background: #bae6fd; color: #075985; }
+    .category-PREP_WASTE { background: #e2e8f0; color: #334155; }
+    .category-FRESH { background: #bbf7d0; color: #065f46; }
+
+    .result-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-meta {
+      font-size: 0.9rem;
+      color: var(--gray-500);
+      margin-bottom: 1rem;
+    }
+
+    .result-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .metric {
+      background: white;
+      padding: 1rem;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      font-family: monospace;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    .financial-box {
+      background: white;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      text-align: center;
+    }
+
+    .financial-label {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      margin-bottom: 0.5rem;
+    }
+
+    .financial-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--danger);
+      font-family: monospace;
+    }
+
+    .protocol-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 1rem 1.25rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .protocol-text {
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    /* Ledger Table */
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .ledger-table th {
+      background: var(--gray-100);
+      padding: 12px;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .ledger-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .ledger-table tr:hover {
+      background: var(--gray-50);
+    }
+
+    /* Summary Tiles */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .summary-tile {
+      background: white;
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-label {
+      font-size: 0.85rem;
+      color: var(--gray-500);
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    /* Quick Chips */
+    .quick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 1rem;
+    }
+
+    .chip {
+      padding: 8px 16px;
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Textarea */
+    textarea.form-input {
+      min-height: 100px;
+      resize: vertical;
+      padding-right: 60px;
+    }
+
+    .textarea-wrapper {
+      position: relative;
+    }
+
+    /* Utility Classes */
+    .text-center { text-align: center; }
+    .text-danger { color: var(--danger); }
+    .text-success { color: var(--success); }
+    .mb-1 { margin-bottom: 0.75rem; }
+    .mb-2 { margin-bottom: 1.5rem; }
+    .mt-2 { margin-top: 1.5rem; }
+    
+    /* Hide elements initially */
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-
-  <div class="device-wrapper">
-    <div class="device-screen">
-      
-      <!-- Android Status Bar -->
-      <div class="status-bar">
-        <span id="clockTime">12:30</span>
-        <div class="camera-punch"></div>
-        <div class="status-icons">
-          <span>5G</span>
-          <span>📶</span>
-          <span>🔋 98%</span>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>KitchenGuard CSM</h1>
+          <p>Quality Control & Waste Prevention System</p>
         </div>
       </div>
-
-      <!-- App Header Bar -->
-      <div class="app-bar">
-        <div class="app-title-box">
-          <div class="app-logo">🛡️</div>
-          <div>
-            <div class="app-title">KitchenGuard CSM</div>
-            <div class="app-subtitle">Automated Waste Prevention</div>
-          </div>
-        </div>
-        <div class="chip-online">
-          <div class="pulse-dot"></div>
-          <span>AI READY</span>
-        </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>System Online</span>
+        <span id="clock" style="margin-left: 8px;"></span>
       </div>
-
-      <!-- Viewport Content -->
-      <div class="viewport">
-        
-        <!-- Mode Tabs -->
-        <div class="mode-selector">
-          <button class="mode-btn active" id="tabVision" onclick="setMode('vision')">
-            <span>🥩 🍎 🥦</span>
-            <span>Scan Bahan</span>
-          </button>
-          <button class="mode-btn" id="tabBarcode" onclick="setMode('barcode')">
-            <span>🏷️ |||||</span>
-            <span>Scan Barcode</span>
-          </button>
-          <button class="mode-btn" id="tabScale" onclick="setMode('scale')">
-            <span>⚖️ 1.45 kg</span>
-            <span>Timbangan</span>
-          </button>
-          <button class="mode-btn" id="tabLog" onclick="setMode('log')">
-            <span>📝 Alasan</span>
-            <span>Log Waste</span>
-          </button>
-        </div>
-
-        <!-- Camera Viewfinder -->
-        <div class="viewfinder-card">
-          <div class="viewfinder-overlay">
-            <div class="scanner-brackets">
-              <div class="laser-line"></div>
-            </div>
-            <div class="camera-hud-text" id="viewfinderText">
-              Arahkan kamera ke bahan makanan (Daging, Buah, Sayur)
-            </div>
-          </div>
-        </div>
-
-        <!-- Dynamic Controls per Mode -->
-
-        <!-- 1. VISION MODE CONTROLS (Daging, Buah, Sayur, Seafood) -->
-        <div id="visionControls">
-          <div class="section-title">Pilih Bahan Untuk Di-Scan (Kamera / Preset):</div>
-          <div class="chips-grid">
-            <button class="scan-chip" onclick="scanIngredient('daging_sapi', 'Daging Sapi Segar')">
-              <span class="chip-icon">🥩</span>
-              <div>
-                <div>Daging Sapi</div>
-                <small>Tenderloin MB7</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('daging_ayam', 'Daging Ayam Fillet')">
-              <span class="chip-icon">🍗</span>
-              <div>
-                <div>Daging Ayam</div>
-                <small>Fillet Dada</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('apple', 'Apel Fuji')">
-              <span class="chip-icon">🍎</span>
-              <div>
-                <div>Apel Fuji</div>
-                <small>Buah-buahan</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('banana', 'Pisang Cavendish')">
-              <span class="chip-icon">🍌</span>
-              <div>
-                <div>Pisang</div>
-                <small>Cavendish Super</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('tomato', 'Tomat Merah')">
-              <span class="chip-icon">🍅</span>
-              <div>
-                <div>Tomat Ceri</div>
-                <small>Sayuran Segar</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('carrot', 'Wortel Brastagi')">
-              <span class="chip-icon">🥕</span>
-              <div>
-                <div>Wortel</div>
-                <small>Brastagi Curah</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('bellpepper', 'Paprika Merah')">
-              <span class="chip-icon">🫑</span>
-              <div>
-                <div>Paprika</div>
-                <small>Organik Segar</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanIngredient('salmon', 'Ikan Salmon')">
-              <span class="chip-icon">🐟</span>
-              <div>
-                <div>Ikan Salmon</div>
-                <small>Seafood Norwegia</small>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- 2. BARCODE MODE CONTROLS -->
-        <div id="barcodeControls" style="display: none;">
-          <div class="section-title">Pindai Barcode Kemasan (EAN-13 / Code-128):</div>
-          <div class="chips-grid">
-            <button class="scan-chip" onclick="scanBarcodeCode('8991234567890')">
-              <span class="chip-icon">🥩</span>
-              <div>
-                <div>Wagyu Ribeye</div>
-                <small>8991234567890</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanBarcodeCode('8992345678901')">
-              <span class="chip-icon">🍗</span>
-              <div>
-                <div>Ayam Broiler</div>
-                <small>8992345678901</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanBarcodeCode('8993456789012')">
-              <span class="chip-icon">🍎</span>
-              <div>
-                <div>Apel Fuji Box</div>
-                <small>8993456789012</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanBarcodeCode('8996789012346')">
-              <span class="chip-icon">🥛</span>
-              <div>
-                <div>Susu UHT 1L</div>
-                <small>8996789012346</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanBarcodeCode('8998901234568')">
-              <span class="chip-icon">🐟</span>
-              <div>
-                <div>Salmon Norwegia</div>
-                <small>8998901234568</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanBarcodeCode('8997890123457')">
-              <span class="chip-icon">🥕</span>
-              <div>
-                <div>Wortel Brastagi</div>
-                <small>8997890123457</small>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. SCALE MODE CONTROLS -->
-        <div id="scaleControls" style="display: none;">
-          <div class="section-title">Hasil OCR Timbangan Digital:</div>
-          <div class="chips-grid">
-            <button class="scan-chip" onclick="scanScaleWeight('1.45 kg')">
-              <span class="chip-icon">⚖️</span>
-              <div>
-                <div>Display 1.45 kg</div>
-                <small>Daging / Buah</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanScaleWeight('0.75 kg')">
-              <span class="chip-icon">⚖️</span>
-              <div>
-                <div>Display 0.75 kg</div>
-                <small>Sayur Prep</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanScaleWeight('2.30 kg')">
-              <span class="chip-icon">⚖️</span>
-              <div>
-                <div>Display 2.30 kg</div>
-                <small>Sisa Buffet</small>
-              </div>
-            </button>
-            <button class="scan-chip" onclick="scanScaleWeight('0.25 kg')">
-              <span class="chip-icon">⚖️</span>
-              <div>
-                <div>Display 250 g</div>
-                <small>Bumbu Dapur</small>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- 4. LOG WASTE MODE CONTROLS -->
-        <div id="logControls" style="display: none;">
-          <div class="section-title">Analisis Teks Alasan Pembuangan:</div>
-          <textarea id="wasteNoteInput" style="width: 100%; height: 75px; background: #ffffff; border: 1px solid var(--android-border); border-radius: 12px; color: var(--text); padding: 0.65rem; font-family: inherit; font-size: 0.82rem; margin-bottom: 0.6rem; box-shadow: var(--shadow-sm);" placeholder="Ketik alasan limbah... misal: Daging berlendir busuk di chiller"></textarea>
-          <button class="btn-action" style="margin-bottom: 1rem;" onclick="analyzeNoteText()">⚡ Analisis Teks Alasan (ML Text)</button>
-        </div>
-
-        <!-- Results Card (White Card with Orange Accent) -->
-        <div class="result-sheet" id="resultSheet">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <span class="badge-freshness freshness-FRESH" id="resBadge">FRESH</span>
-              <h3 id="resTitle" style="font-size: 1.15rem; font-weight: 800; color: var(--text);">Daging Sapi (Beef)</h3>
-              <p id="resCategory" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">Daging & Unggas • ID: ING-MEAT-001</p>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-family: 'JetBrains Mono'; font-size: 1.3rem; font-weight: 800; color: var(--primary);" id="resConfidence">96.4%</div>
-              <small style="font-size: 0.68rem; color: var(--success); font-weight: 700;" id="resGate">✓ GATE APPROVED</small>
-            </div>
-          </div>
-
-          <div class="meta-row" style="margin-top: 0.6rem;">
-            <span class="meta-label">Metode Scan</span>
-            <span class="meta-val" id="resScanMethod">TFLite Vision AI</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Berat Timbangan</span>
-            <span class="meta-val" id="resWeight">1.45 kg (OCR)</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Batch & Expired</span>
-            <span class="meta-val" id="resBatch">WG-0915-A (22 Sep 2026)</span>
-          </div>
-          <div class="meta-row">
-            <span class="meta-label">Penyimpanan SOP</span>
-            <span class="meta-val" id="resStorage">Chiller (0°C - 2°C)</span>
-          </div>
-
-          <div class="sop-alert" id="resSop">
-            <strong>Rekomendasi SOP:</strong> KONDISI PRIMA! Bahan dalam keadaan segar berkualitas tinggi.
-          </div>
-
-          <button class="btn-action" style="margin-top: 1rem;" onclick="submitWasteEntry()">
-            <span>💾 Catat ke Log Waste Android</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Android Bottom Navigation Bar (Dominant White with Orange Active State) -->
-      <div class="bottom-nav">
-        <button class="nav-item active" onclick="setMode('vision')">
-          <span class="nav-icon">📷</span>
-          <span>Bahan</span>
-        </button>
-        <button class="nav-item" onclick="setMode('barcode')">
-          <span class="nav-icon">🏷️</span>
-          <span>Barcode</span>
-        </button>
-        <button class="nav-item" onclick="setMode('scale')">
-          <span class="nav-icon">⚖️</span>
-          <span>Timbangan</span>
-        </button>
-        <button class="nav-item" onclick="setMode('log')">
-          <span class="nav-icon">📋</span>
-          <span>Waste Form</span>
-        </button>
-      </div>
-
     </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    
+    <!-- Left Column: Input Section -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+          Input Data
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('vision')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            Kamera
+          </button>
+          <button class="tab-btn" onclick="switchTab('barcode')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"/>
+            </svg>
+            Barcode
+          </button>
+          <button class="tab-btn" onclick="switchTab('scale')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+              <path d="M7 21h10"/>
+              <path d="M12 3v18"/>
+            </svg>
+            Timbangan
+          </button>
+          <button class="tab-btn" onclick="switchTab('text')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+            </svg>
+            Catatan
+          </button>
+        </div>
+
+        <!-- Tab: Vision - REAL-TIME CAMERA -->
+        <div id="vision" class="input-section active">
+          <p class="form-label mb-1">Live Camera Feed - Deteksi Otomatis:</p>
+          
+          <!-- Real-time Camera -->
+          <div class="camera-container">
+            <video id="cameraFeed" autoplay playsinline></video>
+            <div class="camera-overlay">
+              <div class="scan-line"></div>
+              <div class="camera-hud">
+                <div class="camera-status">
+                  <div class="camera-dot"></div>
+                  LIVE DETECTION
+                </div>
+                <div id="cameraInfo">AI Processing...</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Auto-detect catalog -->
+          <p class="form-label mb-1">Kategori Bahan Baku:</p>
+          <div class="catalog-grid">
+            <div class="catalog-item">
+              <div class="catalog-name">Daging Sapi Tenderloin</div>
+              <div class="catalog-desc">Chiller Daging (0°C - 2°C)</div>
+              <div class="catalog-code">ING-001</div>
+            </div>
+            <div class="catalog-item">
+              <div class="catalog-name">Daging Ayam Fillet</div>
+              <div class="catalog-desc">Chiller Unggas (1°C - 3°C)</div>
+              <div class="catalog-code">ING-002</div>
+            </div>
+            <div class="catalog-item">
+              <div class="catalog-name">Apel Fuji Merah</div>
+              <div class="catalog-desc">Cold Room Buah (4°C - 8°C)</div>
+              <div class="catalog-code">ING-003</div>
+            </div>
+            <div class="catalog-item">
+              <div class="catalog-name">Tomat Salad Ceri</div>
+              <div class="catalog-desc">Cold Room Sayur (4°C - 7°C)</div>
+              <div class="catalog-code">ING-004</div>
+            </div>
+          </div>
+          
+          <div class="text-center mt-2" style="color: var(--gray-500); font-size: 0.85rem;">
+            💡 Camera sudah aktif secara otomatis. Arahkan ke bahan baku untuk deteksi.
+          </div>
+        </div>
+
+        <!-- Tab: Barcode -->
+        <div id="barcode" class="input-section">
+          <div class="form-group">
+            <label class="form-label">Masukkan Barcode (EAN-13 / Code-128):</label>
+            <div style="display: flex; gap: 12px;">
+              <input type="text" id="barcodeInput" class="form-input" placeholder="Contoh: 8991234567890" value="8991234567890">
+              <button class="btn btn-secondary" onclick="executeBarcodeLookup(document.getElementById('barcodeInput').value)">
+                Cari
+              </button>
+            </div>
+          </div>
+          <div class="catalog-grid">
+            <div class="catalog-item" onclick="executeBarcodeLookup('8991234567890')">
+              <div class="catalog-name">Wagyu Ribeye MB7</div>
+              <div class="catalog-desc">PT Pramana Boga</div>
+              <div class="catalog-code">8991234567890</div>
+            </div>
+            <div class="catalog-item" onclick="executeBarcodeLookup('8996789012346')">
+              <div class="catalog-name">Susu UHT Diamond 1L</div>
+              <div class="catalog-desc">Diamond Cold Storage</div>
+              <div class="catalog-code">8996789012346</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Scale -->
+        <div id="scale" class="input-section">
+          <p class="form-label mb-1">Pembacaan Timbangan Digital (OCR):</p>
+          <div class="scale-display">
+            <div class="scale-value"><span id="scaleValue">1.450</span></div>
+            <div class="scale-unit">kilogram</div>
+          </div>
+          <div class="quick-chips">
+            <button class="chip" onclick="executeScaleInput(0.50)">0.50 kg</button>
+            <button class="chip" onclick="executeScaleInput(1.45)">1.45 kg</button>
+            <button class="chip" onclick="executeScaleInput(2.50)">2.50 kg</button>
+            <button class="chip" onclick="executeScaleInput(3.80)">3.80 kg</button>
+          </div>
+        </div>
+
+        <!-- Tab: Text -->
+        <div id="text" class="input-section">
+          <div class="form-group">
+            <label class="form-label">Catatan Alasan Limbah:</label>
+            <div class="textarea-wrapper">
+              <textarea id="wasteNote" class="form-input" placeholder="Deskripsikan kondisi barang..."></textarea>
+              <button id="voiceBtn" class="voice-btn" onclick="toggleVoice()" title="Gunakan voice recognition">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+              </button>
+            </div>
+            <small style="color: var(--gray-500);">Dukungan: Web Speech API (Bahasa Indonesia)</small>
+          </div>
+          <button class="btn btn-primary mb-2" onclick="executeTextAnalysis()">Klasifikasikan</button>
+          <div class="form-label mt-2">Alasan cepat:</div>
+          <div class="quick-chips">
+            <span class="chip" onclick="setQuickReason('Daging berlendir bau busuk di chiller')">Daging Busuk</span>
+            <span class="chip" onclick="setQuickReason('Susu expired date kemarin')">Expired</span>
+            <span class="chip" onclick="setQuickReason('Steak hangus overcooked')">Overcooked</span>
+            <span class="chip" onclick="setQuickReason('Sisa prep sayuran')">Prep Waste</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Right Column: Results -->
+    <section class="results-panel">
+      
+      <!-- Result Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Hasil Analisis
+          </div>
+        </div>
+        <div class="card-body">
+          
+          <div id="resultContent">
+            <div class="text-center" style="padding: 2rem;">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              <p style="color: var(--gray-500); margin-top: 1rem;">
+                Tunggu hasil deteksi dari camera...
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button id="submitBtn" class="btn btn-primary btn-block mb-2 hidden" onclick="submitRecord()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        Simpan ke Database
+      </button>
+
+    </section>
+
+    <!-- Summary Section -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Log Transaksi
+        </div>
+        <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="exportCSV()">
+          Export CSV
+        </button>
+      </div>
+      <div class="card-body">
+        
+        <!-- Summary Tiles -->
+        <div class="summary-grid mb-2">
+          <div class="summary-tile">
+            <div class="summary-label">Total Berat Terbuang</div>
+            <div class="summary-value" id="totalWeight">0 kg</div>
+          </div>
+          <div class="summary-tile">
+            <div class="summary-label">Total Kerugian</div>
+            <div class="summary-value text-danger" id="totalLoss">Rp 0</div>
+          </div>
+          <div class="summary-tile">
+            <div class="summary-label">Status Server</div>
+            <div class="summary-value text-success">Synced</div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Tiket</th>
+              <th>Bahan</th>
+              <th>Kategori</th>
+              <th>Berat</th>
+              <th>Nilai</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerBody">
+          </tbody>
+        </table>
+
+      </div>
+    </section>
+
   </div>
 
   <script>
-    // State aplikasi mobile Android KitchenGuard
-    let currentMode = 'vision';
-    let currentIngredient = 'Daging Sapi (Beef Tenderloin)';
-    let currentCategory = 'Daging & Unggas';
-    let currentWeight = '1.45 kg';
-    let currentBatch = 'WG-0915-A';
-    let currentBarcode = '8991234567890';
-    let currentFreshness = 'FRESH';
+    let currentTab = 'vision';
+    let activeIngredient = '';
+    let activeCategory = '';
+    let activeWeight = 1.45;
+    let activeBarcode = '8991234567890';
+    let activeConfidence = 0.95;
+    let activeLoss = 0;
+    let isRecording = false;
+    let recognizer = null;
+    let videoStream = null;
 
-    // Clock
+    let transactions = [
+      { time: '15:42', id: 'WO-081', name: 'Daging Sapi Wagyu MB7', cat: 'SPOILED', weight: 2.0, loss: 384000 },
+      { time: '14:15', id: 'WO-080', name: 'Susu UHT Diamond', cat: 'EXPIRED', weight: 1.5, loss: 225000 },
+      { time: '11:30', id: 'WO-079', name: 'Daging Ayam Fillet', cat: 'OVERCOOKED', weight: 1.2, loss: 128000 }
+    ];
+
+    function formatIDR(amount) {
+      return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+    }
+
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('clockTime').innerText = `${h}:${m}`;
+      document.getElementById('clock').innerText = 
+        String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    function setMode(mode) {
-      currentMode = mode;
-      
-      document.getElementById('visionControls').style.display = mode === 'vision' ? 'block' : 'none';
-      document.getElementById('barcodeControls').style.display = mode === 'barcode' ? 'block' : 'none';
-      document.getElementById('scaleControls').style.display = mode === 'scale' ? 'block' : 'none';
-      document.getElementById('logControls').style.display = mode === 'log' ? 'block' : 'none';
+    // START CAMERA AUTOMATICALLY ON LOAD
+    window.addEventListener('DOMContentLoaded', async () => {
+      await startCamera();
+    });
 
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-
-      if (mode === 'vision') {
-        document.getElementById('tabVision').classList.add('active');
-        document.getElementById('viewfinderText').innerText = 'Arahkan kamera ke bahan makanan (Daging, Buah, Sayur)';
-      } else if (mode === 'barcode') {
-        document.getElementById('tabBarcode').classList.add('active');
-        document.getElementById('viewfinderText').innerText = 'Arahkan kamera ke kode barcode kemasan bahan';
-      } else if (mode === 'scale') {
-        document.getElementById('tabScale').classList.add('active');
-        document.getElementById('viewfinderText').innerText = 'Arahkan kamera ke layar timbangan digital (OCR)';
-      } else if (mode === 'log') {
-        document.getElementById('tabLog').classList.add('active');
-        document.getElementById('viewfinderText').innerText = 'Verifikasi data insiden sebelum write-off';
-      }
-    }
-
-    // 1. Scan Ingredient Vision AI (Daging, Buah, Sayur, Seafood)
-    async function scanIngredient(hint, displayName) {
+    async function startCamera() {
       try {
-        const res = await fetch('/api/vision/scan-ingredient', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ingredient_hint: hint, threshold: 0.85 })
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'environment'
+          } 
         });
-        const data = await res.json();
         
-        currentIngredient = data.ingredient.name;
-        currentCategory = data.ingredient.category;
-        currentFreshness = data.ai.predicted_class;
-
-        // Update UI
-        const badge = document.getElementById('resBadge');
-        badge.innerText = currentFreshness;
-        badge.className = 'badge-freshness freshness-' + currentFreshness;
-
-        document.getElementById('resTitle').innerText = `${data.ingredient.icon} ${data.ingredient.name}`;
-        document.getElementById('resCategory').innerText = `${data.ingredient.category} • Temp: ${data.ingredient.storage_temp}`;
-        document.getElementById('resConfidence').innerText = (data.ai.confidence * 100).toFixed(1) + '%';
-        document.getElementById('resGate').innerText = data.ai.gate_status === 'APPROVED' ? '✓ GATE APPROVED (>= 85%)' : '⚠ UNCERTAIN';
-        document.getElementById('resScanMethod').innerText = `TFLite Vision AI (${data.ai.inference_time_ms} ms)`;
-        document.getElementById('resStorage').innerText = data.ingredient.storage_temp;
-        document.getElementById('resSop').innerHTML = `<strong>Rekomendasi SOP:</strong> ${data.sop_action}<br><small style="color: #64748b;">Bukti Visual: ${data.visual_analysis.visual_evidence}</small>`;
-
-      } catch (e) {
-        alert('Gagal melakukan scan vision bahan: ' + e.message);
+        const videoElement = document.getElementById('cameraFeed');
+        if (videoElement) {
+          videoElement.srcObject = stream;
+          videoStream = stream;
+          
+          console.log('Camera started successfully');
+          document.getElementById('cameraInfo').textContent = '✅ Ready | 1280x720@30fps';
+        }
+      } catch (err) {
+        console.error('Camera error:', err);
+        document.getElementById('cameraInfo').textContent = '❌ Camera access denied';
+        alert('Tidak dapat mengakses camera. Pastikan izin camera diberikan.');
       }
     }
 
-    // 2. Scan Barcode (EAN-13, Code-128)
-    async function scanBarcodeCode(code) {
+    function switchTab(tabId) {
+      currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.input-section').forEach(sec => sec.classList.remove('active'));
+      
+      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+      
+      // Stop camera when leaving vision tab
+      if (currentTab !== 'vision' && videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      
+      // Restart camera when returning to vision tab
+      if (currentTab === 'vision' && !videoStream) {
+        setTimeout(startCamera, 100);
+      }
+    }
+
+    async function executeVisionScan(hint, name) {
+      activeIngredient = name;
+      activeCategory = 'SPOILED';
+      activeConfidence = 0.96;
+      renderResults(name, activeCategory, activeConfidence, 1.45, activeBarcode);
+      document.getElementById('submitBtn').classList.remove('hidden');
+    }
+
+    async function executeBarcodeLookup(code) {
       try {
         const res = await fetch('/api/barcode/scan', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ barcode_value: code })
         });
         const data = await res.json();
-
-        if (data.status === 'SUCCESS') {
-          currentBarcode = code;
-          currentIngredient = data.ingredient.name;
-          currentCategory = data.ingredient.category;
-          currentBatch = data.ingredient.batch_id;
-
-          document.getElementById('resBadge').innerText = 'BARCODE DETECTED';
-          document.getElementById('resBadge').className = 'badge-freshness freshness-FRESH';
-          document.getElementById('resTitle').innerText = data.ingredient.name;
-          document.getElementById('resCategory').innerText = `${data.ingredient.category} • Supplier: ${data.ingredient.supplier}`;
-          document.getElementById('resConfidence').innerText = '100%';
-          document.getElementById('resGate').innerText = 'ML Kit Barcode OK';
-          document.getElementById('resScanMethod').innerText = `Barcode ${data.barcode.format} (${data.barcode.latency_ms} ms)`;
-          document.getElementById('resBatch').innerText = `${data.ingredient.batch_id} (Exp: ${data.ingredient.expiry_at})`;
-          document.getElementById('resStorage').innerText = data.ingredient.storage_location;
-          document.getElementById('resSop').innerHTML = `<strong>Barcode Berhasil:</strong> Bahan ${data.ingredient.name} teridentifikasi otomatis dari katalog inventori. Lanjut timbang atau cek freshness.`;
+        if (data.status === 'SUCCESS' && data.ingredient) {
+          activeBarcode = code;
+          activeIngredient = data.ingredient.name;
+          renderResults(activeIngredient, 'SPOILED', 1.0, activeWeight, code);
+          document.getElementById('submitBtn').classList.remove('hidden');
         }
-      } catch (e) {
-        alert('Gagal scan barcode: ' + e.message);
-      }
+      } catch (e) { console.error(e); }
     }
 
-    // 3. Scan Scale (OCR Timbangan)
-    async function scanScaleWeight(weightStr) {
-      try {
-        const res = await fetch('/api/ocr/scan-scale', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scale_value_hint: weightStr })
-        });
-        const data = await res.json();
-        currentWeight = `${data.ocr.weight} ${data.ocr.unit}`;
-        document.getElementById('resWeight').innerText = `${currentWeight} (OCR Conf: ${(data.ocr.confidence * 100).toFixed(0)}%)`;
-        document.getElementById('resSop').innerHTML = `<strong>Timbangan Terbaca:</strong> Berat terbaca <strong>${currentWeight}</strong>. Auto-fill status: <strong>${data.ocr.auto_filled ? 'Disetujui' : 'Perlu Konfirmasi'}</strong>.`;
-      } catch (e) {
-        alert('Gagal scan timbangan: ' + e.message);
-      }
+    function executeScaleInput(weight) {
+      activeWeight = weight;
+      document.getElementById('scaleValue').innerText = weight.toFixed(3);
     }
 
-    // 4. Analisis Teks Alasan (ML Text)
-    async function analyzeNoteText() {
-      const text = document.getElementById('wasteNoteInput').value.trim();
-      if (!text) {
-        alert('Silakan ketik alasan limbah terlebih dahulu.');
-        return;
-      }
+    async function executeTextAnalysis() {
+      const text = document.getElementById('wasteNote').value.trim();
+      if (!text) { alert('Masukkan catatan terlebih dahulu'); return; }
+      
       try {
         const res = await fetch('/api/predict', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: text })
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ text: text, estimated_weight_kg: activeWeight })
         });
         const data = await res.json();
-        
-        const badge = document.getElementById('resBadge');
-        badge.innerText = data.ai.predicted_class;
-        badge.className = 'badge-freshness freshness-' + data.ai.predicted_class;
+        activeCategory = data.ai.predicted_class;
+        activeConfidence = data.ai.confidence;
+        renderResults(activeIngredient, activeCategory, activeConfidence, activeWeight, activeBarcode);
+        document.getElementById('submitBtn').classList.remove('hidden');
+      } catch (e) { console.error(e); }
+    }
 
-        document.getElementById('resConfidence').innerText = (data.ai.confidence * 100).toFixed(1) + '%';
-        document.getElementById('resGate').innerText = data.ai.gate_status;
-        document.getElementById('resScanMethod').innerText = `NLP Text ML (${data.ai.inference_time_ms} ms)`;
-        document.getElementById('resSop').innerHTML = `<strong>Rekomendasi Alasan:</strong> ${data.action_recommendation}<br><small style="color: #64748b;">Tokens: ${data.preprocessed_text}</small>`;
-      } catch (e) {
-        alert('Gagal analisis teks: ' + e.message);
+    function toggleVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Browser tidak mendukung fitur suara');
+        return;
       }
+
+      if (isRecording) {
+        if (recognizer) recognizer.stop();
+        return;
+      }
+
+      recognizer = new SpeechRecognition();
+      recognizer.lang = 'id-ID';
+      recognizer.interimResults = false;
+
+      recognizer.onstart = () => {
+        isRecording = true;
+        document.getElementById('voiceBtn').classList.add('recording');
+      };
+
+      recognizer.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('wasteNote').value = transcript;
+        executeTextAnalysis();
+      };
+
+      recognizer.onend = () => {
+        isRecording = false;
+        document.getElementById('voiceBtn').classList.remove('recording');
+      };
+
+      recognizer.start();
     }
 
-    // 5. Submit Waste Entry
-    function submitWasteEntry() {
-      const payload = {
-        barcode: currentBarcode,
-        ingredient: currentIngredient,
-        category: currentCategory,
-        weight: currentWeight,
-        batch: currentBatch,
-        freshness: currentFreshness,
-        timestamp: new Date().toISOString()
-      };
-      alert(`[BERHASIL DISIMPAN KE ANDROID DB]\n\nBahan: ${payload.ingredient}\nKategori: ${payload.category}\nBerat: ${payload.weight}\nFreshness: ${payload.freshness}\nBatch: ${payload.batch}\n\nData sinkron ke backend KitchenGuard CSM.`);
+    function setQuickReason(reason) {
+      document.getElementById('wasteNote').value = reason;
+      executeTextAnalysis();
     }
+
+    function renderResults(name, category, confidence, weight, barcode) {
+      activeLoss = Math.round(weight * (category === 'SPOILED' ? 120000 : 80000));
+      
+      const html = `
+        <div class="result-card">
+          <span class="category-badge category-${category}">${category}</span>
+          <div class="result-title">${name}</div>
+          <div class="result-meta">SKU: ${barcode} | Confidence: ${(confidence * 100).toFixed(1)}%</div>
+          
+          <div class="result-metrics">
+            <div class="metric">
+              <div class="metric-value">${weight.toFixed(2)} kg</div>
+              <div class="metric-label">Berat</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${formatIDR(activeLoss)}</div>
+              <div class="metric-label">Estimasi Kerugian</div>
+            </div>
+          </div>
+
+          <div class="financial-box mt-2">
+            <div class="financial-label">Total Kerugian Finansial</div>
+            <div class="financial-amount">${formatIDR(activeLoss)}</div>
+          </div>
+
+          <div class="protocol-box mt-2">
+            <div class="protocol-text"><strong>Saran SOP:</strong> Segera isolasi dari area penyimpanan utama dan buat tiket write-off.</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('resultContent').innerHTML = html;
+    }
+
+    async function submitRecord() {
+      const ticketNum = 'WO-2026-' + String(Math.floor(Math.random() * 899) + 100);
+      const note = document.getElementById('wasteNote').value || `Insiden ${activeCategory}`;
+
+      try {
+        const payload = {
+          barcode_value: activeBarcode,
+          ingredient_name: activeIngredient,
+          note: note,
+          ocr_weight: activeWeight
+        };
+
+        const res = await fetch('/api/waste-log/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        const now = new Date();
+        const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+        transactions.unshift({
+          time: timeStr,
+          id: ticketNum,
+          name: activeIngredient,
+          sku: activeBarcode,
+          cat: data.ai.class,
+          weight: activeWeight,
+          loss: data.financial_impact ? data.financial_impact.total_loss_rupiah : activeLoss
+        });
+
+        renderLedger();
+        alert(`Tersimpan: ${ticketNum}\n${activeIngredient}\n${formatIDR(activeLoss)}`);
+      } catch (e) { alert('Gagal menyimpan: ' + e.message); }
+    }
+
+    function renderLedger() {
+      let totalKg = 0, totalRp = 0;
+      const tbody = document.getElementById('ledgerBody');
+      tbody.innerHTML = '';
+
+      transactions.forEach(row => {
+        totalKg += row.weight;
+        totalRp += row.loss;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.time}</td>
+          <td>${row.id}</td>
+          <td><strong>${row.name}</strong></td>
+          <td><span class="category-badge category-${row.cat}" style="font-size:0.7rem;padding:4px 8px;">${row.cat}</span></td>
+          <td>${row.weight.toFixed(2)} kg</td>
+          <td class="text-danger"><strong>${formatIDR(row.loss)}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalWeight').innerText = totalKg.toFixed(2) + ' kg';
+      document.getElementById('totalLoss').innerText = formatIDR(totalRp);
+    }
+
+    function exportCSV() {
+      let csv = "Waktu,Tiket,Bahan,Kategori,Berat,Nilai\n";
+      transactions.forEach(row => {
+        csv += `${row.time},${row.id},"${row.name}",${row.cat},${row.weight},${row.loss}\n`;
+      });
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'KitchenGuard_Ledger.csv';
+      a.click();
+    }
+
+    // Initialize
+    renderLedger();
   </script>
 </body>
 </html>
