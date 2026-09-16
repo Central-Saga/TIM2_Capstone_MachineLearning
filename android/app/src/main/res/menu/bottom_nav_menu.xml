@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_vision"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Bahan" />
+    <item
+        android:id="@+id/nav_barcode"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="Barcode" />
+    <item
+        android:id="@+id/nav_scale"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Timbangan" />
+    <item
+        android:id="@+id/nav_log"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="Log Waste" />
+</menu>

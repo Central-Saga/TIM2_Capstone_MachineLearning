@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">KitchenGuard CSM</string>
+    <string name="tagline">Automated Quality Control &amp; Waste Prevention</string>
+    <string name="mode_vision">Scan Bahan</string>
+    <string name="mode_barcode">Scan Barcode</string>
+    <string name="mode_scale">Timbangan</string>
+    <string name="mode_log">Log Waste</string>
+    <string name="btn_save_log">Simpan Log Waste</string>
+</resources>

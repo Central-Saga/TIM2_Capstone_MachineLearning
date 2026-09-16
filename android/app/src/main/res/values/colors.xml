@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema Dominan Putih & Oranye (Material Design 3 Light) -->
+    <color name="white">#FFFFFF</color>
+    <color name="background_white">#F8FAFC</color>
+    <color name="background_dark">#121212</color>
+    <color name="card_surface">#FFFFFF</color>
+    <color name="border_color">#E2E8F0</color>
+    <color name="border_light">#F1F5F9</color>
+    <color name="background_gray">#F1F5F9</color>
+
+    <!-- Material Design Theme Colors -->
+    <color name="md_theme_primary">#FF6B00</color>
+    <color name="md_theme_secondary">#EA580C</color>
+    <color name="md_theme_on_surface">#0F172A</color>
+    <color name="md_theme_outline">#E2E8F0</color>
+
+    <!-- Oranye Utama KitchenGuard -->
+    <color name="orange_primary">#FF6B00</color>
+    <color name="orange_dark">#EA580C</color>
+    <color name="orange_light">#FFF7ED</color>
+    <color name="orange_tint">#FFEDD5</color>
+    <color name="orange_500">#FF6B00</color>
+    <color name="orange_600">#EA580C</color>
+
+    <!-- Color Palette -->
+    <color name="green_500">#16A34A</color>
+    <color name="green_600">#16A34A</color>
+    <color name="red_500">#EF4444</color>
+    <color name="red_600">#DC2626</color>
+    <color name="yellow_600">#D97706</color>
+    <color name="brown_600">#8D6E63</color>
+    <color name="brown_700">#8D6E63</color>
+    <color name="grey_400">#94A3B8</color>
+    <color name="grey_600">#475569</color>
+
+    <!-- Teks Gelap Kontras Tinggi -->
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_muted">#64748B</color>
+    <color name="text_hint">#94A3B8</color>
+
+    <!-- Status Freshness & Gate -->
+    <color name="green_fresh">#16A34A</color>
+    <color name="green_fresh_bg">#DCFCE7</color>
+    <color name="amber_warning">#D97706</color>
+    <color name="amber_warning_bg">#FEF3C7</color>
+    <color name="red_spoiled">#DC2626</color>
+    <color name="red_spoiled_bg">#FEE2E2</color>
+</resources>

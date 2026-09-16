@@ -1,0 +1,14 @@
+{
+  "model_name": "Multinomial Naive Bayes",
+  "version": "kitchenguard-text-v1.0",
+  "classes": [
+    "CONTAMINATED",
+    "EXPIRED",
+    "OVERCOOKED",
+    "PREP_WASTE",
+    "SPOILED",
+    "SURPLUS"
+  ],
+  "test_accuracy": 1.0,
+  "test_macro_f1": 1.0
+}

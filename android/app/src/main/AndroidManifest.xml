@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Permissions required for KitchenGuard Vision & Barcode Scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:label="@string/app_name"
+        android:roundIcon="@android:drawable/ic_menu_camera"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.KitchenGuardCSM"
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Skin Detection Activity untuk hygiene monitoring -->
+        <activity
+            android:name=".SkinDetectionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <!-- Camera Scanner Activity for ingredient detection -->
+        <activity
+            android:name=".CameraScannerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+            
+    </application>
+    
+</manifest>

@@ -1,0 +1,27 @@
+{
+    "api": {
+        "title": "KitchenGuard CSM API",
+        "version": "2.0.0",
+        "debug": false,
+        "cors_origins": [
+            "*"
+        ]
+    },
+    "models": {
+        "waste_classification": {
+            "tfidf_model": "../models/waste_classification/waste_classifier_tfidf.joblib",
+            "classifier_model": "../models/waste_classification/waste_classifier_ensemble.joblib",
+            "label_encoder": "../models/waste_classification/label_encoder.joblib",
+            "confidence_threshold": 0.85
+        }
+    },
+    "data": {
+        "input_dir": "../data/processed/",
+        "output_dir": "../reports/",
+        "log_dir": "../logs/"
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    }
+}

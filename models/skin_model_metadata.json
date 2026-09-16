@@ -1,0 +1,30 @@
+{
+  "model_type": "skin_tone_detection",
+  "version": "1.0.0",
+  "created_at": "2026-09-16 09:57:29.285034",
+  "categories": [
+    "FACE",
+    "HAND"
+  ],
+  "skin_types": [
+    "FAIR_1",
+    "FAIR_2",
+    "FAIR_3"
+  ],
+  "metrics": {
+    "category_accuracy": 0.5013888888888889,
+    "skin_type_accuracy": 0.7291666666666666,
+    "total_samples": 3600,
+    "features_count": 6
+  },
+  "feature_names": [
+    "rgb_mean_r",
+    "rgb_mean_g",
+    "rgb_mean_b",
+    "rgb_std_r",
+    "rgb_std_g",
+    "rgb_std_b"
+  ],
+  "android_compatible": true,
+  "tflite_ready": false
+}

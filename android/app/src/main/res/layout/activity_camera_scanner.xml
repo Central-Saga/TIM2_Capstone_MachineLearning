@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Overlay Gradient for better text visibility -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@android:color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:alpha="0.4"/>
+
+    <!-- Top Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardTopBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:strokeColor="@color/md_theme_primary"
+        app:strokeWidth="2dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="16dp"
+            android:gravity="center_vertical">
+
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_back_arrow"
+                android:contentDescription="Back"
+                app:tint="@color/white"/>
+
+            <!-- Title -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Ingredient Scanner"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginHorizontal="16dp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <!-- Flashlight Button -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/btnFlashlight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_flashlight"
+                android:contentDescription="Flashlight"
+                app:fabSize="mini"
+                app:tint="@color/white"
+                app:backgroundTint="@color/md_theme_secondary"
+                app:maxImageSize="24dp"/>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Status Indicator -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📸 Point camera at an ingredient..."
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:background="@drawable/status_gradient"
+        android:elevation="4dp"
+        android:alpha="0.9"
+        app:layout_constraintTop_toBottomOf="@id/cardTopBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:fontFamily="sans-serif"/>
+
+    <!-- Scanning Guide Box -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardGuide"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:visibility="gone"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="2dp"
+        app:strokeColor="@android:color/holo_green_dark"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Result Card - Appears when detection happens -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="16dp"
+        app:strokeColor="@color/md_theme_primary"
+        app:strokeWidth="2dp"
+        app:layout_constraintBottom_toTopOf="@id/btnCaptureContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Category Badge -->
+            <TextView
+                android:id="@+id/tvCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VEGETABLES"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="@drawable/badge_background"
+                android:textColor="@color/white"
+                android:elevation="4dp"/>
+
+            <!-- Ingredient Name -->
+            <TextView
+                android:id="@+id/tvIngredient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tomato"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_on_surface"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="start"/>
+
+            <!-- RGB Values -->
+            <TextView
+                android:id="@+id/tvRgb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RGB(180, 150, 120)"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Freshness & Confidence Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical">
+
+                <!-- Freshness Badge -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardFreshness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@android:color/holo_green_dark"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:id="@+id/tvFreshness"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="FRESH"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="8dp"/>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Spacer -->
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <!-- Confidence Display -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ProgressBar
+                        android:id="@+id/confidenceBar"
+                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                        android:layout_width="80dp"
+                        android:layout_height="8dp"
+                        android:max="100"
+                        android:progress="75"
+                        android:progressTint="@color/green_500"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvConfidence"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="75%"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_primary"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Recommendations Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardRecommendation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💡 Storage Tips:"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_secondary"/>
+
+                    <TextView
+                        android:id="@+id/tvRecommendation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="• Store at room temp until ripe&#10;• Refrigerate once ripe"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:lineSpacingExtra="4dp"
+                        android:layout_marginTop="8dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Bottom Controls -->
+    <LinearLayout
+        android:id="@+id/btnCaptureContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="@drawable/bottom_sheet_gradient"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Capture Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnCapture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_capture"
+            android:contentDescription="Capture and Analyze"
+            app:fabSize="normal"
+            app:tint="@color/white"
+            app:backgroundTint="@color/md_theme_primary"
+            app:pressedTranslationZ="12dp"
+            app:maxImageSize="32dp"/>
+
+        <!-- Instructions -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tap to capture or hold camera steady for auto-detection"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+
+    <!-- Progress Indicator -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorSize="56dp"
+        app:trackThickness="6dp"
+        app:indicatorColor="@color/md_theme_primary"
+        app:trackColor="@color/md_theme_outline"
+        app:layout_constraintTop_toBottomOf="@id/cardTopBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

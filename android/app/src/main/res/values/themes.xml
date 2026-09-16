@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme: Material 3 Light (Dominant White & Orange) -->
+    <style name="Theme.KitchenGuardCSM" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Primary & Accent Colors -->
+        <item name="colorPrimary">@color/orange_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/orange_light</item>
+        <item name="colorOnPrimaryContainer">@color/orange_dark</item>
+
+        <!-- Surface & Background -->
+        <item name="android:colorBackground">@color/background_white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <!-- Navigation Bar -->
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>
