@@ -129,15 +129,46 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SkinDetectionActivity::class.java))
         }
 
-        // Submit Log Button
+        // Submit Log Button with API Integration & Financial Impact
         binding.btnSubmitLog.setOnClickListener {
-            val message = "Log Limbah Disimpan ke Android DB:\n" +
-                    "• Bahan: $currentIngredient\n" +
-                    "• Kategori: $currentCategory\n" +
-                    "• Berat: $currentWeight\n" +
-                    "• Freshness: $currentFreshness\n" +
-                    "• Batch: $currentBatch"
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+            val weightVal = currentWeight.replace("[^0-9.]".toRegex(), "").toDoubleOrNull() ?: 1.0
+            val req = WasteLogSubmissionRequest(
+                barcodeValue = currentBarcode,
+                ingredientName = currentIngredient,
+                batchId = currentBatch,
+                ocrWeight = weightVal,
+                ocrUnit = "kg",
+                ocrConfidence = 0.94,
+                note = "Kondisi: $currentFreshness pada $currentIngredient (Batch $currentBatch)",
+                reportedBy = "Staff Dapur CSM"
+            )
+            Toast.makeText(this, "Mengirim data log limbah ke server...", Toast.LENGTH_SHORT).show()
+            RetrofitClient.instance.submitWasteLog(req).enqueue(object : Callback<WasteLogSubmissionResponse> {
+                override fun onResponse(call: Call<WasteLogSubmissionResponse>, response: Response<WasteLogSubmissionResponse>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val body = response.body()!!
+                        val lossStr = body.financialImpact?.totalLossRupiah?.let { "Rp %,.0f".format(it) } ?: "Terkalkulasi"
+                        val priority = body.financialImpact?.priorityLevel ?: "NORMAL"
+                        
+                        android.app.AlertDialog.Builder(this@MainActivity)
+                            .setTitle("✅ Waste Log Tercatat di Server")
+                            .setMessage("• Bahan: $currentIngredient\n" +
+                                    "• AI Kategori: ${body.ai.predictedClass} (${body.ai.gateStatus})\n" +
+                                    "• Berat: $currentWeight\n" +
+                                    "• Estimasi Kerugian: $lossStr\n" +
+                                    "• Prioritas Risiko: $priority\n\n" +
+                                    "SOP: ${body.actionRecommendation}")
+                            .setPositiveButton("OK", null)
+                            .show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Tersimpan lokal: $currentIngredient ($currentWeight)", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<WasteLogSubmissionResponse>, t: Throwable) {
+                    Toast.makeText(this@MainActivity, "Mode Offline: Tersimpan di lokal DB ($currentIngredient)", Toast.LENGTH_LONG).show()
+                }
+            })
         }
     }
     

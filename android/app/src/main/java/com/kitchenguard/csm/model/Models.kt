@@ -85,3 +85,40 @@ data class OCRMeta(
     @SerializedName("confidence") val confidence: Double,
     @SerializedName("auto_filled") val autoFilled: Boolean
 )
+
+// Waste Logging & Financial Impact Models
+data class WasteLogSubmissionRequest(
+    @SerializedName("barcode_value") val barcodeValue: String? = null,
+    @SerializedName("ingredient_name") val ingredientName: String? = null,
+    @SerializedName("batch_id") val batchId: String? = null,
+    @SerializedName("ocr_weight") val ocrWeight: Double? = null,
+    @SerializedName("ocr_unit") val ocrUnit: String = "kg",
+    @SerializedName("ocr_confidence") val ocrConfidence: Double? = null,
+    @SerializedName("note") val note: String,
+    @SerializedName("reported_by") val reportedBy: String = "Staff Dapur"
+)
+
+data class WasteLogSubmissionResponse(
+    @SerializedName("timestamp") val timestamp: String,
+    @SerializedName("reported_by") val reportedBy: String?,
+    @SerializedName("ai") val ai: WasteAIMeta,
+    @SerializedName("action_recommendation") val actionRecommendation: String,
+    @SerializedName("financial_impact") val financialImpact: FinancialImpactData?
+)
+
+data class WasteAIMeta(
+    @SerializedName("task") val task: String,
+    @SerializedName("class") val predictedClass: String,
+    @SerializedName("confidence") val confidence: Double,
+    @SerializedName("gate_status") val gateStatus: String,
+    @SerializedName("model_version") val modelVersion: String
+)
+
+data class FinancialImpactData(
+    @SerializedName("category") val category: String,
+    @SerializedName("weight_kg") val weightKg: Double,
+    @SerializedName("cost_per_kg_rupiah") val costPerKgRupiah: Double,
+    @SerializedName("total_loss_rupiah") val totalLossRupiah: Double,
+    @SerializedName("priority_level") val priorityLevel: String,
+    @SerializedName("action_recommendation") val actionRecommendation: String
+)
