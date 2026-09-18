@@ -66,10 +66,20 @@ CAPSTONE_MACHINE_LEARNING/
 ### Step 1: Install Dependencies (Python)
 
 ```bash
-pip install numpy pandas scikit-learn matplotlib seaborn joblib pillow opencv-python
+pip install -r requirements.txt
+# atau manual:
+pip install numpy pandas scikit-learn matplotlib seaborn joblib pillow opencv-python fastapi uvicorn python-multipart pydantic
 ```
 
-### Step 2: Generate Datasets
+### Step 2: Run Unit Tests (Optional but Recommended)
+
+```bash
+cd tests
+python test_cost_calculator.py
+# Output: ✅ ALL TESTS PASSED! (24/24 tests)
+```
+
+### Step 3: Generate Datasets
 
 ```bash
 cd C:\CAPSTONE_MACHINE_LEARNING\src

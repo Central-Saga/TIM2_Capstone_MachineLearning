@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "C:\CAPSTONE_MACHINE_LEARNING\validate_model_advanced.py", line 13, in <module>
+    import pandas as pd
+ModuleNotFoundError: No module named 'pandas'

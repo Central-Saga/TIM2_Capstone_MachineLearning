@@ -1,9 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">KitchenGuard CSM</string>
-    <string name="tagline">Automated Quality Control &amp; Waste Prevention</string>
-    <string name="mode_vision">Scan Bahan</string>
-    <string name="mode_barcode">Scan Barcode</string>
-    <string name="mode_scale">Timbangan</string>
-    <string name="mode_log">Log Waste</string>
-    <string name="btn_save_log">Simpan Log Waste</string>
+    
+    <!-- Menu & Navigation -->
+    <string name="menu_home">Home</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_history">History</string>
+    <string name="menu_settings">Settings</string>
+    
+    <!-- Home Screen -->
+    <string name="input_mode">INPUT MODE</string>
+    <string name="mode_vision">Vision Scan</string>
+    <string name="mode_barcode">Barcode</string>
+    <string name="mode_scale">Scale</string>
+    <string name="mode_note">Voice Note</string>
+    
+    <string name="select_ingredient">SELECT INGREDIENT</string>
+    <string name="beef_tenderloin">Daging Sapi</string>
+    <string name="chicken_fillet">Daging Ayam</string>
+    <string name="fuji_apple">Apel Fuji</string>
+    <string name="cherry_tomato">Tomat Ceri</string>
+    
+    <!-- Result Card -->
+    <string name="confidence_score">Confidence Score</string>
+    <string name="weight">Weight</string>
+    <string name="estimated_loss">Est. Loss</string>
+    <string name="sop_recommendation">SOP RECOMMENDATION</string>
+    <string name="btn_save">SAVE TO DATABASE</string>
+    <string name="btn_cancel">CANCEL</string>
+    <string name="btn_confirm">CONFIRM</string>
+    
+    <!-- Scanner Camera -->
+    <string name="live_scan_active">Live Scan Active</string>
+    <string name="scan_instructions">Arahkan ke bahan makanan (Daging, Buah, Sayur)</string>
+    <string name="camera_permission_denied">Camera permission denied</string>
+    
+    <!-- Status Messages -->
+    <string name="status_online">ONLINE</string>
+    <string name="status_offline">OFFLINE</string>
+    <string name="fresh">FRESH</string>
+    <string name="spoiled">SPOILED</string>
+    <string name="expired">EXPIRED</string>
+    <string name="overcooked">OVERCOOKED</string>
+    <string name="contaminated">CONTAMINATED</string>
+    
+    <!-- Success/Error Messages -->
+    <string name="save_success">Data saved successfully!</string>
+    <string name="save_error">Failed to save data</string>
+    <string name="barcode_scanned">Barcode scanned successfully</string>
+    <string name="analysis_complete">Analysis complete</string>
+    
+    <!-- API Info -->
+    <string name="ai_version">AI Version 3.0</string>
+    <string name="system_status">System Status</string>
 </resources>
