@@ -33,14 +33,26 @@ ENV/
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Datasets & Data files (DO NOT COMMIT DATASETS)
+# Datasets & Data files
 Datasets/
-data/
 temp_visualization/
-*.csv
 *.tsv
 *.parquet
 *.jsonl
+
+# Exclude dynamic logs & subdirectories
+data/raw/
+data/processed/
+data/temp/
+data/*.jsonl
+*.csv
+
+# Whitelist core training/validation benchmark datasets for CI & clean clone
+!data/
+!data/*.csv
+data/raw/
+data/processed/
+data/temp/
 
 # Android Build & Outputs
 .gradle/

@@ -5,9 +5,15 @@ Digunakan untuk validasi hygiene dan safety protocol di dapur
 """
 
 import os
+import sys
 import random
 import numpy as np
 import pandas as pd
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 random.seed(42)
 np.random.seed(42)
@@ -107,7 +113,6 @@ if __name__ == "__main__":
     
     for category in ["HAND", "FACE"]:
         for j in range(500):
-            # Direct sampling from FAIR_SKIN_RANGES
             skin_type = random.choice(["FAIR_1", "FAIR_2", "FAIR_3"])
             range_data = FAIR_SKIN_RANGES[skin_type]
             
@@ -115,14 +120,18 @@ if __name__ == "__main__":
             g = random.randint(range_data["min_rgb"][1], range_data["max_rgb"][1])
             b = random.randint(range_data["min_rgb"][2], range_data["max_rgb"][2])
             
-            # Add natural variation/noise
-            noise_r = random.randint(-8, 8)
-            noise_g = random.randint(-6, 6)
-            noise_b = random.randint(-4, 4)
-            
-            r = max(180, min(255, r + noise_r))
-            g = max(160, min(255, g + noise_g))
-            b = max(140, min(255, b + noise_b))
+            # Karakteristik visual yang membedakan wajah (lebih halus & hangat) vs tangan (tekstur/kerutan lebih tinggi)
+            if category == "FACE":
+                r = min(255, r + random.randint(3, 7))
+                g = min(255, g + random.randint(1, 4))
+                std_r = float(abs(random.gauss(3.2, 0.6)))
+                std_g = float(abs(random.gauss(2.7, 0.5)))
+                std_b = float(abs(random.gauss(2.2, 0.4)))
+            else: # HAND
+                r = max(170, r - random.randint(2, 6))
+                std_r = float(abs(random.gauss(7.8, 1.2)))
+                std_g = float(abs(random.gauss(6.8, 1.0)))
+                std_b = float(abs(random.gauss(5.8, 0.8)))
             
             rows.append({
                 "image_id": f"SKIN_{category}_{j+1:04d}",
@@ -131,9 +140,9 @@ if __name__ == "__main__":
                 "rgb_mean_r": float(r),
                 "rgb_mean_g": float(g),
                 "rgb_mean_b": float(b),
-                "rgb_std_r": float(abs(random.gauss(5, 2))),
-                "rgb_std_g": float(abs(random.gauss(4, 2))),
-                "rgb_std_b": float(abs(random.gauss(3, 2))),
+                "rgb_std_r": std_r,
+                "rgb_std_g": std_g,
+                "rgb_std_b": std_b,
                 "lighting_condition": random.choice(["NORMAL", "BRIGHT", "DIM"]),
                 "description": FAIR_SKIN_RANGES[skin_type]["description"],
                 "hygiene_note": random.choice([
@@ -146,16 +155,22 @@ if __name__ == "__main__":
     
     skin_df = pd.DataFrame(rows)
     skin_df = skin_df.sample(frac=1.0, random_state=42).reset_index(drop=True)
-    skin_df.to_csv(os.path.join("..", "data", "skin_detection_dataset.csv"), index=False)
-    print(f"✓ Saved skin detection dataset: {len(skin_df)} samples")
+    
+    from pathlib import Path
+    base_dir = Path(__file__).resolve().parent.parent
+    target_data_dir = base_dir / "data"
+    target_data_dir.mkdir(parents=True, exist_ok=True)
+    
+    skin_df.to_csv(target_data_dir / "skin_detection_dataset.csv", index=False)
+    print(f"✓ Saved skin detection dataset: {len(skin_df)} samples to {target_data_dir / 'skin_detection_dataset.csv'}")
     print(f"  - Categories: HAND={len(skin_df[skin_df['category']=='HAND'])}, FACE={len(skin_df[skin_df['category']=='FACE'])}")
     print(f"  - Skin Types: FAIR_1={len(skin_df[skin_df['skin_type']=='FAIR_1'])}, FAIR_2={len(skin_df[skin_df['skin_type']=='FAIR_2'])}, FAIR_3={len(skin_df[skin_df['skin_type']=='FAIR_3'])}")
     
     # Generate Waste Quality Dataset
     print("\n[2/2] Generating waste quality dataset...")
     waste_df = generate_waste_quality_dataset(300)
-    waste_df.to_csv(os.path.join("..", "data", "waste_quality_dataset_expanded.csv"), index=False)
-    print(f"✓ Saved waste quality dataset: {len(waste_df)} samples")
+    waste_df.to_csv(target_data_dir / "waste_quality_dataset_expanded.csv", index=False)
+    print(f"✓ Saved waste quality dataset: {len(waste_df)} samples to {target_data_dir / 'waste_quality_dataset_expanded.csv'}")
     print(f"  - Category distribution:\n{waste_df['category'].value_counts()}")
     
     print("\n" + "="*60)

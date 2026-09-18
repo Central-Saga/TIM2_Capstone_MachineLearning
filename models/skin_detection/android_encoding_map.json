@@ -1,0 +1,20 @@
+{
+  "category_classes": {
+    "FACE": 0,
+    "HAND": 1
+  },
+  "skin_type_classes": {
+    "FAIR_1": 0,
+    "FAIR_2": 1,
+    "FAIR_3": 2
+  },
+  "category_to_name": {
+    "FACE": "Face",
+    "HAND": "Hand"
+  },
+  "skin_type_to_name": {
+    "FAIR_1": "Sangat terang, mudah terbakar sinar matahari",
+    "FAIR_2": "Terang, cenderung terbakar",
+    "FAIR_3": "Terang dengan sedikit tan natural"
+  }
+}

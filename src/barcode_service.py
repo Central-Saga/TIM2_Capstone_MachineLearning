@@ -179,13 +179,6 @@ class KitchenGuardBarcodeService:
         elif clean_val in self.db:
             item_data = self.db[clean_val]
             found = True
-        else:
-            # Cari partial match jika awalan cocok
-            for code, data in self.db.items():
-                if clean_val.startswith(code[:8]):
-                    item_data = data
-                    found = True
-                    break
 
         latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
 

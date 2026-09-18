@@ -74,38 +74,48 @@ pip install numpy pandas scikit-learn matplotlib seaborn joblib pillow opencv-py
 ### Step 2: Run Unit Tests (Optional but Recommended)
 
 ```bash
-cd tests
-python test_cost_calculator.py
-# Output: ✅ ALL TESTS PASSED! (24/24 tests)
+python -m pytest -v
+# Output: ✅ 69 passed in 2.2s (test_api_endpoints.py, test_cost_calculator.py, test_kitchenguard.py)
 ```
 
 ### Step 3: Generate Datasets
 
 ```bash
-cd C:\CAPSTONE_MACHINE_LEARNING\src
+# Generate synthetic skin detection dataset
+python src/generate_skin_dataset_final.py
+
+# Datasets generated/available in data/:
+# - data/skin_detection_dataset.csv (1000 samples)
+# - data/waste_quality_dataset_expanded.csv (1800 samples)
+# - data/kitchenguard_waste_dataset.csv (1078 samples)
 ```
 
-Output:
-- ✓ `data/waste_quality_dataset_expanded.csv` - 1800 samples
-
-### Step 3: Train Models
+### Step 4: Train Models
 
 ```bash
+# Train Skin Detection Model (Category & Skin Type Classifiers)
+python scripts/train_skin_model.py
 
-# Train Waste Classifier Model  
-python train_improved_waste_model.py
+# Train Waste Classifier Model (TF-IDF + Ensemble Model)
+python scripts/train_improved_waste_model.py
 ```
 
-**Results:**
-- Skin Type Classifier Accuracy: **90%**
-- Waste Classifier Accuracy: **100%**
+**Results (Held-out Test Evaluation & CV):**
+- Skin Detection Category Accuracy: **100.0%** (HAND vs FACE)
+- Skin Detection Skin Type Accuracy: **92.0%** (FAIR_1, FAIR_2, FAIR_3)
+- Waste Classifier Ensemble Accuracy: **100.0%** (Held-out 20% test split, 576 samples)
+- Waste Classifier 5-Fold Cross-Validation: **1.0000 ± 0.0000** (Pipeline with leakage-free folds)
 
-### Step 4: Deploy to Android
+### Step 5: Android Integration
 
-1. Copy models ke folder Android:
+Android client operates primarily via FastAPI REST API (`docs/ANDROID_API_CONTRACT.md`) with local rule-based fallback:
+1. Helper Java & class maps:
+   - `models/android/WasteClassifierHelper.java`
+   - `models/android/android_classification_map.json`
+   - `models/android/android_encoding_map.json`
+2. Run backend:
 ```bash
-xcopy ..\models\*.joblib android\app\models\ /E /I /Y
-xcopy ..\models\android*.json android\app\models\ /E /I /Y
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 2. Buka Android Studio:

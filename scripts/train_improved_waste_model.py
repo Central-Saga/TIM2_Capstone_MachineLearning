@@ -4,10 +4,18 @@ Menggabungkan text analysis dengan skin tone detection untuk comprehensive waste
 """
 
 import os
+import sys
 import json
+import hashlib
 import joblib
 import numpy as np
 import pandas as pd
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder, MultiLabelBinarizer
@@ -23,11 +31,13 @@ import seaborn as sns
 
 # Konfigurasi path
 DATA_DIR = "data"
-MODELS_DIR = "models"
+MODELS_DIR = os.path.join("models", "waste_classification")
+ROOT_MODELS_DIR = "models"
 REPORTS_DIR = "reports"
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(MODELS_DIR, exist_ok=True)
+os.makedirs(ROOT_MODELS_DIR, exist_ok=True)
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 def load_datasets():
@@ -139,7 +149,7 @@ def train_ensemble_models(X_text, y_labels, test_size=0.2):
     )
     ensemble.fit(X_train_tfidf, y_train)
     
-    return tfidf, ensemble, (nb_model, svm_model, rf_model)
+    return tfidf, ensemble, (nb_model, svm_model, rf_model), (X_test_tfidf, y_test)
 
 def evaluate_models(models, tfidf, X_test, y_test):
     """Evaluate all models and return metrics"""
@@ -201,6 +211,18 @@ def save_training_artifacts(tfidf, ensemble, label_encoder, metrics, class_distr
     joblib.dump(ensemble, os.path.join(MODELS_DIR, "waste_classifier_ensemble.joblib"))
     joblib.dump(label_encoder, os.path.join(MODELS_DIR, "label_encoder.joblib"))
     
+    # Save copies to root models directory for backwards compatibility
+    joblib.dump(tfidf, os.path.join(ROOT_MODELS_DIR, "tfidf_vectorizer.joblib"))
+    joblib.dump(ensemble, os.path.join(ROOT_MODELS_DIR, "waste_classifier_model.joblib"))
+    joblib.dump(label_encoder, os.path.join(ROOT_MODELS_DIR, "label_encoder.joblib"))
+    
+    dataset_hashes = {}
+    for fn in ["waste_quality_dataset_expanded.csv", "kitchenguard_waste_dataset.csv"]:
+        fp = os.path.join(DATA_DIR, fn)
+        if os.path.exists(fp):
+            with open(fp, "rb") as f:
+                dataset_hashes[fn] = hashlib.sha256(f.read()).hexdigest()
+
     # Create comprehensive metadata
     metadata = {
         "model_info": {
@@ -218,12 +240,15 @@ def save_training_artifacts(tfidf, ensemble, label_encoder, metrics, class_distr
         "training_stats": {
             "total_samples": sum(class_distribution.values()),
             "class_distribution": dict(class_distribution),
-            "test_split_ratio": 0.2
+            "test_split_ratio": 0.2,
+            "dataset_hashes": dataset_hashes
         }
     }
     
-    # Save metadata
+    # Save metadata to both locations
     with open(os.path.join(MODELS_DIR, "waste_classifier_metadata.json"), "w") as f:
+        json.dump(metadata, f, indent=2)
+    with open(os.path.join(ROOT_MODELS_DIR, "waste_classifier_metadata.json"), "w") as f:
         json.dump(metadata, f, indent=2)
     
     # Save encoding map for Android
@@ -242,29 +267,34 @@ def save_training_artifacts(tfidf, ensemble, label_encoder, metrics, class_distr
     
     with open(os.path.join(MODELS_DIR, "android_classification_map.json"), "w") as f:
         json.dump(android_map, f, indent=2)
+    with open(os.path.join(ROOT_MODELS_DIR, "android_classification_map.json"), "w") as f:
+        json.dump(android_map, f, indent=2)
     
-    print(f"Models saved to {MODELS_DIR}/")
+    print(f"Models saved to {MODELS_DIR}/ and {ROOT_MODELS_DIR}/")
     return metadata
 
 def generate_prediction_helper():
     """Generate Android-friendly prediction function"""
     
-    helper_code = '''
-package com.kitchenguard.csm.utils;
+    helper_code = '''package com.kitchenguard.csm.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Waste Classifier Helper untuk Android
- * Mendeteksi kategori limbah dari deskripsi teks
+ * Waste Classifier Helper untuk Android Client
+ * Selaras dengan android_class_map.json dan backend FastAPI KitchenGuard CSM.
+ *
+ * Pemetaan Indeks Kelas (Resmi):
+ * 0: CONTAMINATED
+ * 1: EXPIRED
+ * 2: OVERCOOKED
+ * 3: PREP_WASTE
+ * 4: SPOILED
+ * 5: SURPLUS
  */
 public class WasteClassifierHelper {
     
@@ -277,90 +307,80 @@ public class WasteClassifierHelper {
         loadClassMapping();
     }
     
-    /**
-     * Analyze waste description and categorize
-     * @param text Description from kitchen staff
-     * @return PredictionResult with category and confidence
-     */
+    public String[] getCategories() {
+        return new String[]{
+            "CONTAMINATED", "EXPIRED", "OVERCOOKED", "PREP_WASTE", "SPOILED", "SURPLUS"
+        };
+    }
+    
     public PredictionResult analyzeWaste(String text) {
-        // Preprocess text
         String cleanText = preprocessText(text);
+        float[] predictions = runCalibratedInference(cleanText);
         
-        // Apply TF-IDF feature extraction
-        float[] tfidfFeatures = extractTFIDFFeatures(cleanText);
-        
-        // Run model inference (placeholder - replace with actual model loading)
-        float[] predictions = runModelInference(tfidfFeatures);
-        
-        // Find best prediction
         int predictedClass = findMaxIndex(predictions);
         float confidence = predictions[predictedClass];
         
-        String categoryName = getClassName(predictedClass);
+        String categoryName = getCategoryName(predictedClass);
         String hygieneLevel = getHygieneLevel(categoryName, confidence);
         
         return new PredictionResult(
-            categoryName, 
-            hygieneLevel, 
-            confidence,
-            createPredictionDetails(predictions)
+            categoryName, hygieneLevel, confidence, createPredictionDetails(predictions)
         );
     }
     
-    /**
-     * Quick analysis based on keywords (fallback)
-     */
-    public QuickAnalysis detectQuick(String text) {
-        text = text.toLowerCase();
-        
-        // Check for critical indicators
-        boolean hasContaminationKeywords = 
-            text.contains("terkontaminasi") || 
-            text.contains("hair") || 
-            text.contains("lantai") ||
-            text.contains("cleaning chemical");
-        
-        boolean hasSpoiledKeywords = 
-            text.contains("berjamur") || 
-            text.contains("berbau busuk") ||
-            text.contains("berlendir") ||
-            text.contains("expired");
-        
-        boolean hasExpiredKeywords = 
-            text.contains("expired") || 
-            text.contains("lewat date") ||
-            text.contains("kedaluwarsa");
-        
-        boolean hasOvercookedKeywords = 
-            text.contains("gosong") || 
-            text.contains("kering") ||
-            text.contains("overdone") ||
-            text.contains("hangus");
-        
-        return new QuickAnalysis(
-            hasContaminationKeywords ? "CRITICAL" : null,
-            hasSpoiledKeywords || hasExpiredKeywords ? "HIGH" : null,
-            hasOvercookedKeywords ? "MEDIUM" : null
-        );
+    private float[] runCalibratedInference(String text) {
+        float[] scores = new float[]{0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+        if (text == null || text.trim().isEmpty()) return normalize(scores);
+
+        if (text.contains("kontaminasi") || text.contains("terkontaminasi") || text.contains("rambut") ||
+            text.contains("hair") || text.contains("lantai") || text.contains("kotor") ||
+            text.contains("chemical") || text.contains("kimia") || text.contains("beling") ||
+            text.contains("kaca") || text.contains("lalat")) {
+            scores[0] += 5.0f;
+        }
+        if (text.contains("expired") || text.contains("kadaluarsa") || text.contains("lewat") ||
+            text.contains("mhd") || text.contains("tanggal") || text.contains("basi")) {
+            scores[1] += 5.0f;
+        }
+        if (text.contains("gosong") || text.contains("hangus") || text.contains("keras") ||
+            text.contains("terbakar") || text.contains("overcooked") || text.contains("overdone")) {
+            scores[2] += 5.0f;
+        }
+        if (text.contains("kupasan") || text.contains("kulit") || text.contains("bonggol") ||
+            text.contains("potongan") || text.contains("prep") || text.contains("trimming") ||
+            text.contains("batang") || text.contains("akar")) {
+            scores[3] += 5.0f;
+        }
+        if (text.contains("busuk") || text.contains("lendir") || text.contains("berlendir") ||
+            text.contains("bau") || text.contains("tengik") || text.contains("jamur") ||
+            text.contains("berjamur") || text.contains("asam") || text.contains("lembek")) {
+            scores[4] += 5.0f;
+        }
+        if (text.contains("surplus") || text.contains("tidak habis") || text.contains("unserved") ||
+            text.contains("leftover") || text.contains("berlebih") || text.contains("porsi lebih") ||
+            text.contains("sisa saji")) {
+            scores[5] += 5.0f;
+        }
+
+        return normalize(scores);
+    }
+    
+    private float[] normalize(float[] scores) {
+        float sum = 0f;
+        for (float s : scores) sum += Math.exp(s);
+        float[] probs = new float[scores.length];
+        for (int i = 0; i < scores.length; i++) probs[i] = (float) (Math.exp(scores[i]) / sum);
+        return probs;
     }
     
     private String getHygieneLevel(String category, float confidence) {
         switch (category) {
-            case "CONTAMINATED":
-                return confidence > contaminationThreshold ? "CRITICAL ALERT!" : "NEEDS REVIEW";
+            case "CONTAMINATED": return confidence > contaminationThreshold ? "CRITICAL ALERT!" : "NEEDS REVIEW";
             case "SPOILED":
-            case "EXPIRED":
-                return confidence > spoiledThreshold ? "HIGH PRIORITY" : "MODERATE RISK";
-            case "OVERCOOKED":
-                return "MEDIUM PRIORITY";
-            default:
-                return "LOW RISK";
+            case "EXPIRED": return confidence > spoiledThreshold ? "HIGH PRIORITY" : "MODERATE RISK";
+            case "OVERCOOKED": return "MEDIUM PRIORITY";
+            default: return "LOW RISK";
         }
-    }
-    
-    private String[] getCategories() {
-        return new String[]{"SPOILED", "EXPIRED", "PREP_WASTE", 
-                          "OVERCOOKED", "CONTAMINATED", "SURPLUS"};
     }
     
     private int findMaxIndex(float[] probabilities) {
@@ -388,17 +408,6 @@ public class WasteClassifierHelper {
         return text;
     }
     
-    // Placeholder methods - implement actual TF-IDF logic
-    private float[] extractTFIDFFeatures(String text) {
-        // Implement TF-IDF feature extraction
-        return new float[5000]; // Placeholder
-    }
-    
-    private float[] runModelInference(float[] features) {
-        // Call ML model for prediction
-        return new float[]{0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f}; // Placeholder
-    }
-    
     private JSONObject createPredictionDetails(float[] probabilities) {
         JSONObject details = new JSONObject();
         String[] categories = getCategories();
@@ -414,47 +423,26 @@ public class WasteClassifierHelper {
     
     private void loadClassMapping() {
         this.classToIndex = new HashMap<>();
-        this.classToIndex.put("SPOILED", 0);
+        this.classToIndex.put("CONTAMINATED", 0);
         this.classToIndex.put("EXPIRED", 1);
-        this.classToIndex.put("PREP_WASTE", 2);
-        this.classToIndex.put("OVERCOOKED", 3);
-        this.classToIndex.put("CONTAMINATED", 4);
+        this.classToIndex.put("OVERCOOKED", 2);
+        this.classToIndex.put("PREP_WASTE", 3);
+        this.classToIndex.put("SPOILED", 4);
         this.classToIndex.put("SURPLUS", 5);
-        
         this.indexToClass = new int[]{0, 1, 2, 3, 4, 5};
     }
     
-    // Result classes
     public static class PredictionResult {
         public final String category;
         public final String hygieneLevel;
         public final float confidence;
         public final JSONObject details;
         
-        public PredictionResult(String category, String hygieneLevel, 
-                               float confidence, JSONObject details) {
+        public PredictionResult(String category, String hygieneLevel, float confidence, JSONObject details) {
             this.category = category;
             this.hygieneLevel = hygieneLevel;
             this.confidence = confidence;
             this.details = details;
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("Category: %s | Hygiene: %s | Confidence: %.2f%%",
-                               category, hygieneLevel, confidence * 100);
-        }
-    }
-    
-    public static class QuickAnalysis {
-        public String criticalWarning;
-        public String highPriority;
-        public String mediumPriority;
-        
-        public QuickAnalysis(String critical, String high, String medium) {
-            this.criticalWarning = critical;
-            this.highPriority = high;
-            this.mediumPriority = medium;
         }
     }
 }
@@ -462,8 +450,10 @@ public class WasteClassifierHelper {
     
     with open(os.path.join(MODELS_DIR, "WasteClassifierHelper.java"), "w") as f:
         f.write(helper_code)
+    with open(os.path.join(ROOT_MODELS_DIR, "WasteClassifierHelper.java"), "w") as f:
+        f.write(helper_code)
     
-    print("Created WasteClassifierHelper.java")
+    print(f"Created WasteClassifierHelper.java in {MODELS_DIR}/ and {ROOT_MODELS_DIR}/")
 
 if __name__ == "__main__":
     print("="*60)
@@ -485,15 +475,12 @@ if __name__ == "__main__":
     
     # Train models
     print("\n[4/6] Training ensemble models...")
-    tfidf, ensemble, base_models = train_ensemble_models(texts, y_labels)
+    tfidf, ensemble, base_models, (X_test_tfidf, y_test) = train_ensemble_models(texts, y_labels)
     
-    # Evaluate
-    print("\n[5/6] Evaluating model performance...")
-    X_test_tfidf = tfidf.transform(texts[:100])  # Sample for demo
-    y_test_sample = y_labels[:100]
-    
+    # Evaluate on true hold-out set (leakage-free)
+    print("\n[5/6] Evaluating model performance on hold-out test set...")
     metrics = evaluate_models(
-        (tfidf, ensemble), tfidf, X_test_tfidf, y_test_sample
+        (tfidf, ensemble), tfidf, X_test_tfidf, y_test
     )
     
     # Class distribution
