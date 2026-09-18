@@ -1,336 +1,460 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<!-- KitchenGuard CSM - Modern White/Orange Design -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_white"
+    android:background="#F8FAFC"
     tools:context=".MainActivity">
 
-    <!-- Top App Bar (Dominant White with Orange Accent) -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:elevation="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="16dp">
-
-            <!-- Logo Orange Icon -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                app:cardCornerRadius="10dp"
-                app:cardBackgroundColor="@color/orange_primary"
-                app:cardElevation="2dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="🛡️"
-                    android:textSize="18sp" />
-            </androidx.cardview.widget.CardView>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="KitchenGuard CSM"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp"
-                    android:fontFamily="sans-serif-black" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Quality Control &amp; Waste AI"
-                    android:textColor="@color/orange_primary"
-                    android:textSize="11sp"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
-
-            <!-- Status Pill -->
-            <TextView
-                android:id="@+id/tvAiStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="● AI ONLINE"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="@color/orange_primary"
-                android:background="@color/orange_light"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="4dp" />
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- Main Scrollable Content -->
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="60dp"
-        android:layout_marginBottom="64dp"
-        android:fillViewport="true">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- Top App Bar - Clean White with Orange Accent -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="64dp"
+            android:background="@color/white"
+            app:elevation="2dp"
+            app:titleTextColor="@color/text_primary"
+            app:title="KitchenGuard CSM"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge">
 
-            <!-- Mode Selector Chips (Orange Active, White Surface) -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:layout_marginBottom="12dp">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupMode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:singleSelection="true"
-                    app:selectionRequired="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipVision"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="🥩 Scan Bahan"
-                        app:chipBackgroundColor="@color/white"
-                        app:chipStrokeColor="@color/orange_primary"
-                        android:textColor="@color/text_primary" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipBarcode"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🏷️ Scan Barcode"
-                        app:chipBackgroundColor="@color/white"
-                        android:textColor="@color/text_muted" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipScale"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚖️ Timbangan"
-                        app:chipBackgroundColor="@color/white"
-                        android:textColor="@color/text_muted" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipLog"
-                        style="@style/Widget.Material3.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📝 Log Waste"
-                        app:chipBackgroundColor="@color/white"
-                        android:textColor="@color/text_muted" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
-
-            <!-- Camera Viewfinder Card -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="220dp"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="#0F172A"
-                android:layout_marginBottom="14dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <!-- Camera Preview View (CameraX) -->
-                    <androidx.camera.view.PreviewView
-                        android:id="@+id/previewView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-
-                    <!-- Overlay Brackets & Laser -->
-                    <View
-                        android:layout_width="190dp"
-                        android:layout_height="140dp"
-                        android:layout_centerInParent="true"
-                        android:background="@drawable/scanner_brackets" />
-
-                    <!-- Hud Hint Text -->
-                    <TextView
-                        android:id="@+id/tvCameraHud"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginBottom="12dp"
-                        android:text="Arahkan ke bahan makanan (Daging, Buah, Sayur)"
-                        android:textColor="@color/white"
-                        android:textSize="11sp"
-                        android:background="#CC0F172A"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="4dp" />
-                </RelativeLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Quick Action Test Presets (Daging, Buah, Sayur, Seafood) -->
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PILIH SAMPEL BAHAN (VISION AI):"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_muted"
-                android:layout_marginBottom="8dp" />
+                android:layout_gravity="end|center_vertical"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingEnd="16dp">
 
-            <GridLayout
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/status_dot_green"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ONLINE"
+                    android:textColor="@color/orange_primary"
+                    android:textSize="11sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <!-- Scrollable Content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:layout_marginBottom="14dp">
+                android:orientation="vertical"
+                android:padding="20dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSampleBeef"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="🥩 Daging Sapi"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_primary"
-                    app:strokeColor="@color/border_color"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSampleChicken"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="🍗 Daging Ayam"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_primary"
-                    app:strokeColor="@color/border_color"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSampleApple"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginEnd="4dp"
-                    android:text="🍎 Apel Fuji"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_primary"
-                    app:strokeColor="@color/border_color"
-                    app:cornerRadius="10dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSampleTomato"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_marginStart="4dp"
-                    android:text="🍅 Tomat Ceri"
-                    android:textSize="12sp"
-                    android:textColor="@color/text_primary"
-                    app:strokeColor="@color/border_color"
-                    app:cornerRadius="10dp" />
-            </GridLayout>
-
-            <!-- Result CardView (Dominant White with Orange Accent) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/white"
-                app:strokeColor="@color/border_color"
-                app:strokeWidth="1dp"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="2dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
+                <!-- Welcome Card -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/white"
+                    android:layout_marginBottom="20dp">
 
-                    <!-- Top Orange Accent Line -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="3dp"
-                        android:background="@color/orange_primary"
-                        android:layout_marginBottom="12dp" />
-
-                    <!-- Header Row: Title & Confidence -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:orientation="vertical"
+                        android:padding="20dp">
 
+                        <!-- Icon Badge -->
                         <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:background="@drawable/circle_orange_bg"
+                            android:gravity="center"
+                            android:layout_marginBottom="12dp">
 
                             <TextView
-                                android:id="@+id/tvFreshnessBadge"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="FRESH"
-                                android:textStyle="bold"
-                                android:textColor="@color/green_fresh"
-                                android:background="@color/green_fresh_bg"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="3dp"
-                                android:textSize="11sp" />
-
-                            <TextView
-                                android:id="@+id/tvIngredientTitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Daging Sapi (Tenderloin)"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp" />
-
-                            <TextView
-                                android:id="@+id/tvCategorySubtitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Daging &amp; Unggas • Chiller 0°C - 2°C"
-                                android:textColor="@color/orange_primary"
-                                android:textSize="11sp"
-                                android:textStyle="bold" />
+                                android:text="🛡️"
+                                android:textSize="28sp"/>
                         </LinearLayout>
 
-                        <LinearLayout
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:text="Quality Control & Waste Prevention"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="AI-Powered Freshness Detection System"
+                            android:textColor="@color/orange_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Mode Selector Tabs -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="INPUT MODE"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginStart="4dp"/>
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    app:tabIndicatorHeight="3dp"
+                    app:tabIndicatorColor="@color/orange_primary"
+                    app:tabSelectedTextColor="@color/orange_primary"
+                    app:tabTextColor="@color/text_muted"
+                    app:tabMode="fixed"
+                    android:layout_marginBottom="20dp">
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📷 Kam"/>
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔍 Barcode"/>
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚖️ Scale"/>
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎤 Note"/>
+                </com.google.android.material.tabs.TabLayout>
+
+                <!-- Camera Preview Area -->
+                <FrameLayout
+                    android:id="@+id/cameraContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:background="#0F172A"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="gone">
+
+                    <androidx.camera.view.PreviewView
+                        android:id="@+id/previewView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                    <View
+                        android:layout_width="180dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/scanner_brackets_white"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="16dp"
+                        android:text="Live Scan Active"
+                        android:textColor="#38BDF8"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                </FrameLayout>
+
+                <!-- Quick Action Buttons -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SELECT INGREDIENT"
+                    android:textColor="@color/text_muted"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginStart="4dp"/>
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="2"
+                    android:layout_marginBottom="20dp">
+
+                    <!-- Daging Sapi -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:gravity="end">
+                            android:padding="16dp"
+                            android:gravity="center"
+                            android:onClick="onIngredientClick">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🥩"
+                                android:textSize="32sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Daging Sapi"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:gravity="center"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ING-001"
+                                android:textColor="@color/orange_primary"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Daging Ayam -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center"
+                            android:onClick="onIngredientClick">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🍗"
+                                android:textSize="32sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Daging Ayam"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:gravity="center"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ING-002"
+                                android:textColor="@color/orange_primary"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Apel Fuji -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center"
+                            android:onClick="onIngredientClick">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🍎"
+                                android:textSize="32sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Apel Fuji"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:gravity="center"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ING-003"
+                                android:textColor="@color/orange_primary"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Tomat Ceri -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="8dp"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="2dp"
+                        app:cardBackgroundColor="@color/white">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center"
+                            android:onClick="onIngredientClick">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🍅"
+                                android:textSize="32sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tomat Ceri"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                android:gravity="center"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="ING-004"
+                                android:textColor="@color/orange_primary"
+                                android:textSize="11sp"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </GridLayout>
+
+                <!-- Result Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="6dp"
+                    app:cardBackgroundColor="@color/white"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <!-- Orange Accent Line -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="4dp"
+                            android:background="@color/orange_primary"
+                            android:layout_marginBottom="16dp"/>
+
+                        <!-- Status Badge -->
+                        <TextView
+                            android:id="@+id/tvStatusBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FRESH"
+                            android:textColor="@color/green_fresh"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="5dp"
+                            android:background="@drawable/badge_green_rounded"/>
+
+                        <!-- Title -->
+                        <TextView
+                            android:id="@+id/tvIngredientTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Daging Sapi Tenderloin"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="4dp"/>
+
+                        <!-- Subtitle -->
+                        <TextView
+                            android:id="@+id/tvSubtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Daging & Unggas • Chiller 0°C - 2°C"
+                            android:textColor="@color/orange_primary"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="16dp"/>
+
+                        <!-- Confidence Meter -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="16dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Confidence Score"
+                                android:textColor="@color/text_muted"
+                                android:textSize="12sp"/>
 
                             <TextView
                                 android:id="@+id/tvConfidence"
@@ -338,110 +462,127 @@
                                 android:layout_height="wrap_content"
                                 android:text="96.4%"
                                 android:textColor="@color/orange_primary"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
+                                android:textSize="20sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <!-- Metrics Grid -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="16dp">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="12dp"
+                                android:background="@drawable/card_light_orange">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Weight"
+                                    android:textColor="@color/text_muted"
+                                    android:textSize="10sp"/>
+
+                                <TextView
+                                    android:id="@+id/tvWeightValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1.45 kg"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="4dp"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:padding="12dp"
+                                android:background="@drawable/card_light_orange"
+                                android:layout_marginStart="8dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Est. Loss"
+                                    android:textColor="@color/text_muted"
+                                    android:textSize="10sp"/>
+
+                                <TextView
+                                    android:id="@+id/tvLossValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rp 174,000"
+                                    android:textColor="@color/danger"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="4dp"/>
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- SOP Alert Box -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:background="@drawable/alert_orange_box"
+                            android:padding="14dp"
+                            android:layout_marginBottom="12dp">
 
                             <TextView
-                                android:id="@+id/tvGateStatus"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="✓ GATE APPROVED"
-                                android:textColor="@color/green_fresh"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
+                                android:text="📋 SOP RECOMMENDATION"
+                                android:textColor="@color/orange_dark"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="6dp"/>
+
+                            <TextView
+                                android:id="@+id/tvSopText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Isolate from main storage immediately and create write-off ticket."
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp"/>
                         </LinearLayout>
-                    </LinearLayout>
 
-                    <!-- Meta Rows -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/border_light"
-                        android:layout_marginVertical="10dp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Berat Timbangan (OCR)"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:id="@+id/tvWeightValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1.45 kg"
-                            android:textColor="@color/text_primary"
+                        <!-- Submit Button -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSubmit"
+                            android:layout_width="match_parent"
+                            android:layout_height="52dp"
+                            android:text="💾 SAVE TO DATABASE"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
                             android:textStyle="bold"
-                            android:textSize="12sp" />
+                            app:backgroundTint="@color/orange_primary"
+                            app:cornerRadius="12dp"
+                            app:elevation="2dp"/>
                     </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="6dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Batch / Expired"
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:id="@+id/tvBatchValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="WG-0915-A (22 Sep 2026)"
-                            android:textColor="@color/text_primary"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
-                    </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
 
-                    <!-- SOP Recommendation Alert -->
-                    <TextView
-                        android:id="@+id/tvSopAction"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Rekomendasi SOP: KONDISI PRIMA! Simpan di chiller dengan rotasi FIFO."
-                        android:textColor="@color/orange_dark"
-                        android:background="@color/orange_light"
-                        android:padding="10dp"
-                        android:textSize="12sp"
-                        android:layout_marginTop="12dp" />
+        <!-- Bottom Navigation -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@color/white"
+            app:itemIconTint="@color/orange_primary"
+            app:itemTextColor="@color/orange_primary"
+            app:labelVisibilityMode="labeled"
+            app:elevation="8dp"/>
 
-                    <!-- Primary Save Action Button (Vibrant Orange) -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSubmitLog"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="💾 Simpan ke Log Waste Android"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        app:backgroundTint="@color/orange_primary"
-                        app:cornerRadius="12dp"
-                        android:layout_marginTop="12dp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <!-- Bottom Navigation Bar (Dominant White with Orange Active Item) -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_gravity="bottom"
-        android:background="@color/white"
-        app:elevation="8dp"
-        app:itemIconTint="@color/orange_primary"
-        app:itemTextColor="@color/orange_primary"
-        app:menu="@menu/bottom_nav_menu" />
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -3,55 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KitchenGuard CSM - Quality Control System</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>KitchenGuard CSM | Intelligent Quality Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #ea580c;
-      --primary-dark: #c2410c;
-      --success: #15803d;
-      --warning: #ca8a04;
-      --danger: #dc2626;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-500: #6b7280;
-      --gray-700: #374151;
-      --gray-900: #111827;
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+      --radius-sm: 8px;
       --radius: 12px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.1);
-      --shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --radius-lg: 20px;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--gray-50);
-      color: var(--gray-900);
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      color: var(--dark);
+      min-height: 100vh;
       line-height: 1.6;
-      font-size: 15px;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 80%, rgba(99,102,241,0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(236,72,153,0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-5%, -5%) rotate(5deg); }
     }
 
     /* Header */
     .header {
       background: white;
-      padding: 1rem 2rem;
+      backdrop-filter: blur(20px);
       box-shadow: var(--shadow);
       position: sticky;
       top: 0;
       z-index: 100;
+      padding: 1rem 2rem;
     }
 
     .header-content {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
@@ -61,167 +82,177 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 1rem;
     }
 
-    .brand-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--primary);
+    .logo-badge {
+      width: 50px;
+      height: 50px;
+      background: var(--gradient-primary);
       border-radius: var(--radius);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
+      font-size: 1.5rem;
+      box-shadow: var(--shadow-lg);
     }
 
     .brand-text h1 {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      color: var(--gray-900);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .brand-text p {
       font-size: 0.85rem;
-      color: var(--gray-500);
+      color: #64748b;
     }
 
-    .status-badge {
+    .status-indicator {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: #ecfdf5;
-      color: var(--success);
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+      border-radius: 50px;
+      border: 1px solid #bbf7d0;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
+    .live-dot {
+      width: 10px;
+      height: 10px;
       background: var(--success);
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
     }
 
     /* Main Container */
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
       display: grid;
+      grid-template-columns: 1fr 400px;
       gap: 2rem;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
       .container {
         grid-template-columns: 1fr;
-        padding: 1rem;
       }
     }
 
     /* Cards */
     .card {
       background: white;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
       overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 25px 35px -5px rgba(0,0,0,0.15);
     }
 
     .card-header {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--gray-200);
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .card-title {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: var(--gray-700);
+      color: var(--dark);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.75rem;
     }
 
     .card-body {
       padding: 1.5rem;
     }
 
-    /* Tab Navigation */
+    /* Tabs */
     .tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 1.5rem;
-      background: var(--gray-100);
-      padding: 6px;
+      gap: 0.5rem;
+      background: #f1f5f9;
+      padding: 0.5rem;
       border-radius: var(--radius);
+      margin-bottom: 1.5rem;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px 20px;
+      padding: 0.75rem 1rem;
       border: none;
       background: transparent;
-      border-radius: var(--radius);
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--gray-500);
-      transition: all 0.2s;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
     .tab-btn:hover {
-      background: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.6);
+      color: var(--dark);
     }
 
     .tab-btn.active {
       background: white;
-      color: var(--gray-900);
+      color: var(--primary);
+      font-weight: 600;
       box-shadow: var(--shadow);
     }
 
-    /* Input Areas */
-    .input-section {
-      display: none;
-    }
-
-    .input-section.active {
-      display: block;
-    }
-
-    /* Camera Container */
-    .camera-container {
+    /* Camera Section */
+    .camera-section {
       position: relative;
-      width: 100%;
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      background: var(--gray-900);
+      background: var(--dark);
+      aspect-ratio: 16/9;
       margin-bottom: 1.5rem;
     }
 
     #cameraFeed {
       width: 100%;
-      height: auto;
-      display: block;
-      background: black;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .camera-overlay {
+    .scan-overlay {
       position: absolute;
       inset: 0;
+      background: 
+        repeating-linear-gradient(
+          transparent 0,
+          transparent 50px,
+          rgba(99,102,241,0.03) 50px,
+          rgba(99,102,241,0.03) 51px
+        ),
+        radial-gradient(circle at 50% 50%, transparent 40%, rgba(99,102,241,0.1) 41%, transparent 42%);
       pointer-events: none;
     }
 
@@ -230,9 +261,9 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: var(--primary);
-      box-shadow: 0 0 10px var(--primary);
-      animation: scan 2s ease-in-out infinite;
+      background: var(--gradient-primary);
+      box-shadow: 0 0 20px var(--primary);
+      animation: scan 3s ease-in-out infinite;
     }
 
     @keyframes scan {
@@ -240,7 +271,7 @@
       50% { top: 90%; opacity: 1; }
     }
 
-    .camera-hud {
+    .hud-overlay {
       position: absolute;
       bottom: 1rem;
       left: 1rem;
@@ -249,72 +280,92 @@
       justify-content: space-between;
       color: white;
       font-size: 0.75rem;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
 
-    .camera-status {
-      display: inline-flex;
+    .hud-item {
+      display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      background: rgba(234, 88, 12, 0.9);
-      border-radius: 15px;
-      font-weight: 600;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      background: rgba(0,0,0,0.5);
+      border-radius: var(--radius-sm);
+      backdrop-filter: blur(10px);
     }
 
-    .camera-dot {
-      width: 6px;
-      height: 6px;
-      background: white;
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0.3; }
+    .hud-status {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(16,185,129,0.2);
+      color: #34d399;
+      border: 1px solid rgba(16,185,129,0.3);
     }
 
     /* Catalog Grid */
     .catalog-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 1rem;
     }
 
-    .catalog-item {
+    .catalog-card {
       padding: 1.25rem;
-      background: var(--gray-50);
-      border: 2px solid var(--gray-200);
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 2px solid #e2e8f0;
       border-radius: var(--radius);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
     }
 
-    .catalog-item:hover {
+    .catalog-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .catalog-card:hover {
       border-color: var(--primary);
-      background: white;
-      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .catalog-card:hover::before {
+      opacity: 0.05;
+    }
+
+    .catalog-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
     }
 
     .catalog-name {
       font-weight: 600;
-      color: var(--gray-900);
-      margin-bottom: 4px;
+      color: var(--dark);
+      margin-bottom: 0.25rem;
     }
 
     .catalog-desc {
-      font-size: 0.85rem;
-      color: var(--gray-500);
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
     }
 
     .catalog-code {
-      font-size: 0.75rem;
-      color: var(--gray-500);
-      margin-top: 8px;
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--primary);
+      background: rgba(99,102,241,0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      display: inline-block;
     }
 
-    /* Form Inputs */
+    /* Form Elements */
     .form-group {
       margin-bottom: 1.25rem;
     }
@@ -323,331 +374,317 @@
       display: block;
       font-size: 0.9rem;
       font-weight: 600;
-      color: var(--gray-700);
+      color: #475569;
       margin-bottom: 0.5rem;
     }
 
     .form-input {
       width: 100%;
-      padding: 12px 16px;
-      border: 2px solid var(--gray-300);
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
       border-radius: var(--radius);
       font-size: 1rem;
-      transition: border-color 0.2s;
+      transition: all 0.3s;
+      font-family: inherit;
     }
 
     .form-input:focus {
       outline: none;
       border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
     }
 
     /* Buttons */
     .btn {
-      padding: 12px 24px;
+      padding: 0.75rem 1.5rem;
       border: none;
       border-radius: var(--radius);
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 0.5rem;
+      font-family: inherit;
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: var(--gradient-primary);
       color: white;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.3);
     }
 
     .btn-primary:hover {
-      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99,102,241,0.4);
     }
 
     .btn-secondary {
-      background: var(--gray-200);
-      color: var(--gray-700);
+      background: white;
+      color: var(--dark);
+      border: 2px solid #e2e8f0;
     }
 
     .btn-secondary:hover {
-      background: var(--gray-300);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     .btn-block {
       width: 100%;
     }
 
-    /* Scale Display */
-    .scale-display {
-      background: var(--gray-900);
-      color: white;
-      padding: 2rem;
-      border-radius: var(--radius);
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .scale-value {
-      font-size: 3rem;
-      font-weight: 700;
-      color: #38bdf8;
-      font-family: monospace;
-    }
-
-    .scale-unit {
-      font-size: 1.25rem;
-      color: var(--gray-400);
-    }
-
-    /* Voice Button */
-    .voice-btn {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius);
-      border: 2px solid var(--gray-300);
-      background: var(--gray-50);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .voice-btn:hover {
-      border-color: var(--primary);
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-
-    .voice-btn.recording {
-      background: #fee2e2;
-      border-color: var(--danger);
-      color: var(--danger);
-      animation: pulse 1.5s infinite;
-    }
-
     /* Results Panel */
-    .results-panel {
-      display: grid;
-      gap: 1.5rem;
+    .result-animated {
+      opacity: 0;
+      animation: slideIn 0.5s forwards;
     }
 
-    .result-card {
-      background: var(--gray-50);
-      padding: 1.5rem;
-      border-radius: var(--radius);
-      border-left: 4px solid var(--primary);
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .category-badge {
       display: inline-block;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: 1rem;
     }
 
-    .category-SPOILED { background: #fed7aa; color: #9a3412; }
-    .category-EXPIRED { background: #fecdd3; color: #9f1239; }
-    .category-CONTAMINATED { background: #fecaca; color: #991b1b; }
-    .category-OVERCOOKED { background: #e9d5ff; color: #6b21a8; }
-    .category-SURPLUS { background: #bae6fd; color: #075985; }
-    .category-PREP_WASTE { background: #e2e8f0; color: #334155; }
-    .category-FRESH { background: #bbf7d0; color: #065f46; }
-
-    .result-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      margin-bottom: 0.5rem;
+    .badge-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
     }
 
-    .result-meta {
-      font-size: 0.9rem;
-      color: var(--gray-500);
-      margin-bottom: 1rem;
+    .badge-warning {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
     }
 
-    .result-metrics {
+    .badge-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+
+    .metric-cards {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       margin-top: 1rem;
     }
 
-    .metric {
-      background: white;
-      padding: 1rem;
+    .metric-card {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 1.25rem;
       border-radius: var(--radius);
-      text-align: center;
+      border-left: 4px solid var(--primary);
+      transition: all 0.3s;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
 
     .metric-value {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 700;
-      color: var(--gray-900);
-      font-family: monospace;
+      color: var(--dark);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 0.25rem;
     }
 
     .metric-label {
       font-size: 0.85rem;
-      color: var(--gray-500);
-      margin-top: 4px;
+      color: #64748b;
     }
 
-    .financial-box {
-      background: white;
+    .financial-highlight {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
       padding: 1.5rem;
       border-radius: var(--radius);
       text-align: center;
+      margin-top: 1.5rem;
+      border: 2px solid #fecaca;
     }
 
     .financial-label {
       font-size: 0.85rem;
-      color: var(--gray-500);
+      color: #991b1b;
       margin-bottom: 0.5rem;
     }
 
     .financial-amount {
-      font-size: 2rem;
+      font-size: 2.5rem;
       font-weight: 800;
-      color: var(--danger);
-      font-family: monospace;
+      color: #dc2626;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .protocol-box {
-      background: #eff6ff;
-      border-left: 4px solid #3b82f6;
-      padding: 1rem 1.25rem;
-      border-radius: 0 var(--radius) var(--radius) 0;
-    }
-
-    .protocol-text {
-      font-size: 0.9rem;
-      color: var(--gray-700);
-    }
-
-    /* Ledger Table */
+    /* LEDGER TABLE */
     .ledger-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       margin-top: 1rem;
     }
 
     .ledger-table th {
-      background: var(--gray-100);
-      padding: 12px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 1rem;
       text-align: left;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--gray-700);
-      border-bottom: 2px solid var(--gray-200);
+      color: #475569;
+      border-bottom: 2px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .ledger-table td {
-      padding: 12px;
-      border-bottom: 1px solid var(--gray-200);
+      padding: 1rem;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .ledger-table tr:hover {
-      background: var(--gray-50);
+    .ledger-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ledger-table tr:hover td {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
 
     /* Summary Tiles */
-    .summary-grid {
+    .summary-tiles {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 1rem;
+      margin-bottom: 1.5rem;
     }
 
-    .summary-tile {
+    .summary-card {
       background: white;
       padding: 1.25rem;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.05) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .summary-card:hover::after {
+      opacity: 1;
     }
 
     .summary-label {
       font-size: 0.85rem;
-      color: var(--gray-500);
+      color: #64748b;
       margin-bottom: 0.5rem;
     }
 
     .summary-value {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 700;
-      color: var(--gray-900);
-    }
-
-    /* Quick Chips */
-    .quick-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 1rem;
-    }
-
-    .chip {
-      padding: 8px 16px;
-      background: var(--gray-100);
-      border: 1px solid var(--gray-200);
-      border-radius: 20px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .chip:hover {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    /* Textarea */
-    textarea.form-input {
-      min-height: 100px;
-      resize: vertical;
-      padding-right: 60px;
-    }
-
-    .textarea-wrapper {
-      position: relative;
+      color: var(--dark);
     }
 
     /* Utility Classes */
-    .text-center { text-align: center; }
-    .text-danger { color: var(--danger); }
-    .text-success { color: var(--success); }
-    .mb-1 { margin-bottom: 0.75rem; }
-    .mb-2 { margin-bottom: 1.5rem; }
-    .mt-2 { margin-top: 1.5rem; }
-    
-    /* Hide elements initially */
     .hidden { display: none !important; }
+    .text-danger { color: #dc2626; }
+    .text-success { color: #10b981; }
+    .mt-2 { margin-top: 1.5rem; }
+    .mb-1 { margin-bottom: 0.75rem; }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .action-chip {
+      padding: 0.5rem 1rem;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .action-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    /* Voice Button */
+    .voice-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #e2e8f0;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .voice-btn:hover {
+      border-color: var(--primary);
+      background: rgba(99,102,241,0.1);
+      transform: scale(1.1);
+    }
+
+    .voice-btn.recording {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-color: var(--danger);
+      animation: recordPulse 1.5s infinite;
+    }
+
+    @keyframes recordPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
   </style>
 </head>
 <body>
+  <!-- Background Animation -->
+  <div class="bg-animation"></div>
+
   <!-- Header -->
   <header class="header">
     <div class="header-content">
       <div class="brand">
-        <div class="brand-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-        </div>
+        <div class="logo-badge">🛡️</div>
         <div class="brand-text">
           <h1>KitchenGuard CSM</h1>
-          <p>Quality Control & Waste Prevention System</p>
+          <p>Intelligent Waste Prevention & Quality Control System</p>
         </div>
       </div>
-      <div class="status-badge">
-        <div class="status-dot"></div>
-        <span>System Online</span>
-        <span id="clock" style="margin-left: 8px;"></span>
+      <div class="status-indicator">
+        <div class="live-dot"></div>
+        <span style="font-weight: 600;">System Online</span>
+        <span id="clock" style="color: #64748b; font-size: 0.9rem;"></span>
       </div>
     </div>
   </header>
@@ -659,158 +696,112 @@
     <section class="card">
       <div class="card-header">
         <div class="card-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2"/>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-          </svg>
-          Input Data
+          <span>📊</span>
+          Data Input Center
         </div>
       </div>
       <div class="card-body">
         
-        <!-- Tabs -->
+        <!-- Navigation Tabs -->
         <div class="tabs">
           <button class="tab-btn active" onclick="switchTab('vision')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
-            Kamera
+            <span>📷</span> Kamera
           </button>
           <button class="tab-btn" onclick="switchTab('barcode')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"/>
-            </svg>
-            Barcode
+            <span>🔍</span> Barcode
           </button>
           <button class="tab-btn" onclick="switchTab('scale')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
-              <path d="M7 21h10"/>
-              <path d="M12 3v18"/>
-            </svg>
-            Timbangan
+            <span>⚖️</span> Timbangan
           </button>
           <button class="tab-btn" onclick="switchTab('text')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
-            </svg>
-            Catatan
+            <span>🎤</span> Catatan
           </button>
         </div>
 
         <!-- Tab: Vision - REAL-TIME CAMERA -->
-        <div id="vision" class="input-section active">
-          <p class="form-label mb-1">Live Camera Feed - Deteksi Otomatis:</p>
-          
-          <!-- Real-time Camera -->
-          <div class="camera-container">
+        <div id="vision" class="input-section">
+          <div class="camera-section">
             <video id="cameraFeed" autoplay playsinline></video>
-            <div class="camera-overlay">
-              <div class="scan-line"></div>
-              <div class="camera-hud">
-                <div class="camera-status">
-                  <div class="camera-dot"></div>
-                  LIVE DETECTION
-                </div>
-                <div id="cameraInfo">AI Processing...</div>
+            <div class="scan-overlay"></div>
+            <div class="scan-line"></div>
+            <div class="hud-overlay">
+              <div class="hud-item hud-status">
+                <div class="live-dot" style="width: 8px; height: 8px;"></div>
+                <span>LIVE AI SCAN</span>
               </div>
+              <div class="hud-item" id="cameraInfo">Ready...</div>
             </div>
           </div>
-          
-          <!-- Auto-detect catalog -->
-          <p class="form-label mb-1">Kategori Bahan Baku:</p>
+
+          <p class="form-label mb-1">Quick Select Ingredient:</p>
           <div class="catalog-grid">
-            <div class="catalog-item">
-              <div class="catalog-name">Daging Sapi Tenderloin</div>
-              <div class="catalog-desc">Chiller Daging (0°C - 2°C)</div>
+            <div class="catalog-card" onclick="useIngredient('Daging Sapi Tenderloin', 'ING-001')">
+              <div class="catalog-icon">🥩</div>
+              <div class="catalog-name">Daging Sapi</div>
+              <div class="catalog-desc">Chiller 0°C - 2°C</div>
               <div class="catalog-code">ING-001</div>
             </div>
-            <div class="catalog-item">
-              <div class="catalog-name">Daging Ayam Fillet</div>
-              <div class="catalog-desc">Chiller Unggas (1°C - 3°C)</div>
+            <div class="catalog-card" onclick="useIngredient('Daging Ayam Fillet', 'ING-002')">
+              <div class="catalog-icon">🍗</div>
+              <div class="catalog-name">Daging Ayam</div>
+              <div class="catalog-desc">Chiller 1°C - 3°C</div>
               <div class="catalog-code">ING-002</div>
             </div>
-            <div class="catalog-item">
-              <div class="catalog-name">Apel Fuji Merah</div>
-              <div class="catalog-desc">Cold Room Buah (4°C - 8°C)</div>
+            <div class="catalog-card" onclick="useIngredient('Apel Fuji Merah', 'ING-003')">
+              <div class="catalog-icon">🍎</div>
+              <div class="catalog-name">Apel Fuji</div>
+              <div class="catalog-desc">Cold Room 4°C - 8°C</div>
               <div class="catalog-code">ING-003</div>
             </div>
-            <div class="catalog-item">
-              <div class="catalog-name">Tomat Salad Ceri</div>
-              <div class="catalog-desc">Cold Room Sayur (4°C - 7°C)</div>
+            <div class="catalog-card" onclick="useIngredient('Tomat Salad Ceri', 'ING-004')">
+              <div class="catalog-icon">🍅</div>
+              <div class="catalog-name">Tomat Ceri</div>
+              <div class="catalog-desc">Cold Room 4°C - 7°C</div>
               <div class="catalog-code">ING-004</div>
             </div>
-          </div>
-          
-          <div class="text-center mt-2" style="color: var(--gray-500); font-size: 0.85rem;">
-            💡 Camera sudah aktif secara otomatis. Arahkan ke bahan baku untuk deteksi.
           </div>
         </div>
 
         <!-- Tab: Barcode -->
         <div id="barcode" class="input-section">
           <div class="form-group">
-            <label class="form-label">Masukkan Barcode (EAN-13 / Code-128):</label>
-            <div style="display: flex; gap: 12px;">
+            <label class="form-label">Scan or Enter Barcode (EAN-13 / Code-128):</label>
+            <div style="display: flex; gap: 0.75rem;">
               <input type="text" id="barcodeInput" class="form-input" placeholder="Contoh: 8991234567890" value="8991234567890">
-              <button class="btn btn-secondary" onclick="executeBarcodeLookup(document.getElementById('barcodeInput').value)">
-                Cari
-              </button>
-            </div>
-          </div>
-          <div class="catalog-grid">
-            <div class="catalog-item" onclick="executeBarcodeLookup('8991234567890')">
-              <div class="catalog-name">Wagyu Ribeye MB7</div>
-              <div class="catalog-desc">PT Pramana Boga</div>
-              <div class="catalog-code">8991234567890</div>
-            </div>
-            <div class="catalog-item" onclick="executeBarcodeLookup('8996789012346')">
-              <div class="catalog-name">Susu UHT Diamond 1L</div>
-              <div class="catalog-desc">Diamond Cold Storage</div>
-              <div class="catalog-code">8996789012346</div>
+              <button class="btn btn-secondary" onclick="lookupBarcode()">Cari</button>
             </div>
           </div>
         </div>
 
         <!-- Tab: Scale -->
         <div id="scale" class="input-section">
-          <p class="form-label mb-1">Pembacaan Timbangan Digital (OCR):</p>
-          <div class="scale-display">
-            <div class="scale-value"><span id="scaleValue">1.450</span></div>
-            <div class="scale-unit">kilogram</div>
-          </div>
-          <div class="quick-chips">
-            <button class="chip" onclick="executeScaleInput(0.50)">0.50 kg</button>
-            <button class="chip" onclick="executeScaleInput(1.45)">1.45 kg</button>
-            <button class="chip" onclick="executeScaleInput(2.50)">2.50 kg</button>
-            <button class="chip" onclick="executeScaleInput(3.80)">3.80 kg</button>
+          <p class="form-label mb-1">Select Weight Value:</p>
+          <div class="quick-actions">
+            <button class="action-chip" onclick="setWeight(0.5)">0.50 kg</button>
+            <button class="action-chip" onclick="setWeight(1.0)">1.00 kg</button>
+            <button class="action-chip" onclick="setWeight(1.45)">1.45 kg</button>
+            <button class="action-chip" onclick="setWeight(2.0)">2.00 kg</button>
+            <button class="action-chip" onclick="setWeight(2.5)">2.50 kg</button>
           </div>
         </div>
 
         <!-- Tab: Text -->
         <div id="text" class="input-section">
           <div class="form-group">
-            <label class="form-label">Catatan Alasan Limbah:</label>
-            <div class="textarea-wrapper">
-              <textarea id="wasteNote" class="form-input" placeholder="Deskripsikan kondisi barang..."></textarea>
-              <button id="voiceBtn" class="voice-btn" onclick="toggleVoice()" title="Gunakan voice recognition">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
-                </svg>
+            <label class="form-label">Waste Reason Note:</label>
+            <div style="position: relative;">
+              <textarea id="wasteNote" class="form-input" placeholder="Deskripsikan kondisi bahan..."></textarea>
+              <button id="voiceBtn" class="voice-btn" onclick="toggleVoice()" title="Use voice input">
+                🎙️
               </button>
             </div>
-            <small style="color: var(--gray-500);">Dukungan: Web Speech API (Bahasa Indonesia)</small>
           </div>
-          <button class="btn btn-primary mb-2" onclick="executeTextAnalysis()">Klasifikasikan</button>
-          <div class="form-label mt-2">Alasan cepat:</div>
-          <div class="quick-chips">
-            <span class="chip" onclick="setQuickReason('Daging berlendir bau busuk di chiller')">Daging Busuk</span>
-            <span class="chip" onclick="setQuickReason('Susu expired date kemarin')">Expired</span>
-            <span class="chip" onclick="setQuickReason('Steak hangus overcooked')">Overcooked</span>
-            <span class="chip" onclick="setQuickReason('Sisa prep sayuran')">Prep Waste</span>
+          <button class="btn btn-primary btn-block" onclick="analyzeText()">Analyze Text ✨</button>
+          <div class="form-label mt-2">Quick Reasons:</div>
+          <div class="quick-actions">
+            <span class="action-chip" onclick="setQuickReason('Daging berlendir bau busuk')">Daging Busuk</span>
+            <span class="action-chip" onclick="setQuickReason('Susu expired date kemarin')">Expired</span>
+            <span class="action-chip" onclick="setQuickReason('Steak hangus overcooked')">Burnt</span>
           </div>
         </div>
 
@@ -818,90 +809,67 @@
     </section>
 
     <!-- Right Column: Results -->
-    <section class="results-panel">
-      
-      <!-- Result Card -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            Hasil Analisis
-          </div>
-        </div>
-        <div class="card-body">
-          
-          <div id="resultContent">
-            <div class="text-center" style="padding: 2rem;">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2">
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-              </svg>
-              <p style="color: var(--gray-500); margin-top: 1rem;">
-                Tunggu hasil deteksi dari camera...
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Submit Button -->
-      <button id="submitBtn" class="btn btn-primary btn-block mb-2 hidden" onclick="submitRecord()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
-        </svg>
-        Simpan ke Database
-      </button>
-
-    </section>
-
-    <!-- Summary Section -->
     <section class="card">
       <div class="card-header">
         <div class="card-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          Log Transaksi
+          <span>✨</span>
+          AI Analysis Result
         </div>
-        <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;" onclick="exportCSV()">
-          Export CSV
-        </button>
       </div>
       <div class="card-body">
         
-        <!-- Summary Tiles -->
-        <div class="summary-grid mb-2">
-          <div class="summary-tile">
-            <div class="summary-label">Total Berat Terbuang</div>
-            <div class="summary-value" id="totalWeight">0 kg</div>
-          </div>
-          <div class="summary-tile">
-            <div class="summary-label">Total Kerugian</div>
-            <div class="summary-value text-danger" id="totalLoss">Rp 0</div>
-          </div>
-          <div class="summary-tile">
-            <div class="summary-label">Status Server</div>
-            <div class="summary-value text-success">Synced</div>
+        <div id="resultContent">
+          <div style="text-align: center; padding: 3rem; color: #94a3b8;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🤖</div>
+            <p style="font-size: 1.1rem;">Wait for analysis result...</p>
           </div>
         </div>
 
-        <!-- Table -->
+        <button id="submitBtn" class="btn btn-primary btn-block mt-2 hidden" onclick="submitRecord()">
+          💾 Save to Database
+        </button>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Bottom Section: Ledger -->
+  <section class="container">
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋</span>
+          Transaction Log & Analytics
+        </div>
+      </div>
+      <div class="card-body">
+        
+        <!-- Summary Metrics -->
+        <div class="summary-tiles">
+          <div class="summary-card">
+            <div class="summary-label">Total Weight Wasted</div>
+            <div class="summary-value" id="totalWeight">0 kg</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Total Financial Loss</div>
+            <div class="summary-value text-danger" id="totalLoss">Rp 0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Transactions Today</div>
+            <div class="summary-value" id="transactionCount">0</div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
         <table class="ledger-table">
           <thead>
             <tr>
-              <th>Waktu</th>
-              <th>Tiket</th>
-              <th>Bahan</th>
-              <th>Kategori</th>
-              <th>Berat</th>
-              <th>Nilai</th>
+              <th>Time</th>
+              <th>Ingredient</th>
+              <th>Category</th>
+              <th>Weight</th>
+              <th>Value</th>
             </tr>
           </thead>
           <tbody id="ledgerBody">
@@ -910,98 +878,78 @@
 
       </div>
     </section>
-
-  </div>
+  </section>
 
   <script>
-    let currentTab = 'vision';
-    let activeIngredient = '';
-    let activeCategory = '';
-    let activeWeight = 1.45;
-    let activeBarcode = '8991234567890';
-    let activeConfidence = 0.95;
-    let activeLoss = 0;
+    let currentIngredient = '';
+    let currentBarcode = '8991234567890';
+    let currentWeight = 1.45;
+    let videoStream = null;
     let isRecording = false;
     let recognizer = null;
-    let videoStream = null;
 
     let transactions = [
-      { time: '15:42', id: 'WO-081', name: 'Daging Sapi Wagyu MB7', cat: 'SPOILED', weight: 2.0, loss: 384000 },
-      { time: '14:15', id: 'WO-080', name: 'Susu UHT Diamond', cat: 'EXPIRED', weight: 1.5, loss: 225000 },
-      { time: '11:30', id: 'WO-079', name: 'Daging Ayam Fillet', cat: 'OVERCOOKED', weight: 1.2, loss: 128000 }
+      { time: '15:42', name: 'Daging Sapi Wagyu MB7', cat: 'SPOILED', weight: 2.0, loss: 384000 },
+      { time: '14:15', name: 'Susu UHT Diamond', cat: 'EXPIRED', weight: 1.5, loss: 225000 },
+      { time: '11:30', name: 'Daging Ayam Broiler', cat: 'OVERCOOKED', weight: 1.2, loss: 128000 }
     ];
 
+    // Format Rupiah
     function formatIDR(amount) {
       return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
     }
 
-    function updateClock() {
+    // Update Clock
+    setInterval(() => {
       const now = new Date();
-      document.getElementById('clock').innerText = 
+      document.getElementById('clock').textContent = 
         String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    }, 1000);
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.input-section').forEach(sec => sec.classList.remove('hidden'));
+      
+      event.target.closest('.tab-btn').classList.add('active');
+      document.getElementById(tabId).classList.remove('hidden');
+
+      if (tabId === 'vision') startCamera();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
 
-    // START CAMERA AUTOMATICALLY ON LOAD
-    window.addEventListener('DOMContentLoaded', async () => {
-      await startCamera();
-    });
-
+    // Camera Functions
     async function startCamera() {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Browser tidak mendukung kamera');
+        }
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: 'environment'
-          } 
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } }
         });
         
-        const videoElement = document.getElementById('cameraFeed');
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          videoStream = stream;
-          
-          console.log('Camera started successfully');
-          document.getElementById('cameraInfo').textContent = '✅ Ready | 1280x720@30fps';
-        }
+        const video = document.getElementById('cameraFeed');
+        video.srcObject = stream;
+        videoStream = stream;
+        
+        document.getElementById('cameraInfo').innerHTML = '<span style="color:#34d399">● Ready | 1280x720</span>';
+        console.log('✅ Camera started');
       } catch (err) {
-        console.error('Camera error:', err);
-        document.getElementById('cameraInfo').textContent = '❌ Camera access denied';
-        alert('Tidak dapat mengakses camera. Pastikan izin camera diberikan.');
+        console.error('❌ Camera error:', err);
+        document.getElementById('cameraInfo').innerHTML = '<span style="color:#f87171">✗ Access denied</span>';
       }
     }
 
-    function switchTab(tabId) {
-      currentTab = tabId;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.input-section').forEach(sec => sec.classList.remove('active'));
-      
-      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-      
-      // Stop camera when leaving vision tab
-      if (currentTab !== 'vision' && videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-      }
-      
-      // Restart camera when returning to vision tab
-      if (currentTab === 'vision' && !videoStream) {
-        setTimeout(startCamera, 100);
-      }
-    }
-
-    async function executeVisionScan(hint, name) {
-      activeIngredient = name;
-      activeCategory = 'SPOILED';
-      activeConfidence = 0.96;
-      renderResults(name, activeCategory, activeConfidence, 1.45, activeBarcode);
+    // Ingredient Selection
+    function useIngredient(name, code) {
+      currentIngredient = name;
+      currentBarcode = code;
+      analyzeResult(name, 'SPOILED', currentWeight);
       document.getElementById('submitBtn').classList.remove('hidden');
     }
 
-    async function executeBarcodeLookup(code) {
+    async function lookupBarcode() {
+      const code = document.getElementById('barcodeInput').value;
       try {
         const res = await fetch('/api/barcode/scan', {
           method: 'POST',
@@ -1009,21 +957,18 @@
           body: JSON.stringify({ barcode_value: code })
         });
         const data = await res.json();
-        if (data.status === 'SUCCESS' && data.ingredient) {
-          activeBarcode = code;
-          activeIngredient = data.ingredient.name;
-          renderResults(activeIngredient, 'SPOILED', 1.0, activeWeight, code);
+        if (data.status === 'SUCCESS') {
+          currentIngredient = data.ingredient.name;
+          currentBarcode = code;
+          analyzeResult(currentIngredient, 'SPOILED', currentWeight);
           document.getElementById('submitBtn').classList.remove('hidden');
         }
-      } catch (e) { console.error(e); }
+      } catch (e) { alert('Error: ' + e.message); }
     }
 
-    function executeScaleInput(weight) {
-      activeWeight = weight;
-      document.getElementById('scaleValue').innerText = weight.toFixed(3);
-    }
+    function setWeight(w) { currentWeight = w; }
 
-    async function executeTextAnalysis() {
+    async function analyzeText() {
       const text = document.getElementById('wasteNote').value.trim();
       if (!text) { alert('Masukkan catatan terlebih dahulu'); return; }
       
@@ -1031,99 +976,57 @@
         const res = await fetch('/api/predict', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ text: text, estimated_weight_kg: activeWeight })
+          body: JSON.stringify({ text: text, estimated_weight_kg: currentWeight })
         });
         const data = await res.json();
-        activeCategory = data.ai.predicted_class;
-        activeConfidence = data.ai.confidence;
-        renderResults(activeIngredient, activeCategory, activeConfidence, activeWeight, activeBarcode);
+        analyzeResult('Bahan dari Catatan', data.ai.predicted_class, currentWeight);
         document.getElementById('submitBtn').classList.remove('hidden');
-      } catch (e) { console.error(e); }
+      } catch (e) { alert('Error: ' + e.message); }
     }
 
-    function toggleVoice() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        alert('Browser tidak mendukung fitur suara');
-        return;
-      }
-
-      if (isRecording) {
-        if (recognizer) recognizer.stop();
-        return;
-      }
-
-      recognizer = new SpeechRecognition();
-      recognizer.lang = 'id-ID';
-      recognizer.interimResults = false;
-
-      recognizer.onstart = () => {
-        isRecording = true;
-        document.getElementById('voiceBtn').classList.add('recording');
-      };
-
-      recognizer.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        document.getElementById('wasteNote').value = transcript;
-        executeTextAnalysis();
-      };
-
-      recognizer.onend = () => {
-        isRecording = false;
-        document.getElementById('voiceBtn').classList.remove('recording');
-      };
-
-      recognizer.start();
-    }
-
-    function setQuickReason(reason) {
-      document.getElementById('wasteNote').value = reason;
-      executeTextAnalysis();
-    }
-
-    function renderResults(name, category, confidence, weight, barcode) {
-      activeLoss = Math.round(weight * (category === 'SPOILED' ? 120000 : 80000));
+    // Analyze Result Display
+    function analyzeResult(name, category, weight) {
+      const loss = weight * (category === 'SPOILED' ? 120000 : 80000);
+      const badgeClass = category === 'SPOILED' ? 'badge-danger' : 
+                         category === 'EXPIRED' ? 'badge-warning' : 'badge-success';
       
-      const html = `
-        <div class="result-card">
-          <span class="category-badge category-${category}">${category}</span>
-          <div class="result-title">${name}</div>
-          <div class="result-meta">SKU: ${barcode} | Confidence: ${(confidence * 100).toFixed(1)}%</div>
+      document.getElementById('resultContent').innerHTML = `
+        <div class="result-animated">
+          <span class="category-badge ${badgeClass}">${category}</span>
+          <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">${name}</h3>
+          <p style="color: #64748b; margin-bottom: 1.5rem;">SKU: ${currentBarcode}</p>
           
-          <div class="result-metrics">
-            <div class="metric">
+          <div class="metric-cards">
+            <div class="metric-card">
               <div class="metric-value">${weight.toFixed(2)} kg</div>
-              <div class="metric-label">Berat</div>
+              <div class="metric-label">Weight Verified</div>
             </div>
-            <div class="metric">
-              <div class="metric-value">${formatIDR(activeLoss)}</div>
-              <div class="metric-label">Estimasi Kerugian</div>
+            <div class="metric-card">
+              <div class="metric-value">${formatIDR(loss)}</div>
+              <div class="metric-label">Financial Impact</div>
             </div>
           </div>
 
-          <div class="financial-box mt-2">
-            <div class="financial-label">Total Kerugian Finansial</div>
-            <div class="financial-amount">${formatIDR(activeLoss)}</div>
+          <div class="financial-highlight">
+            <div class="financial-label">💰 Total Estimated Loss</div>
+            <div class="financial-amount">${formatIDR(loss)}</div>
           </div>
 
-          <div class="protocol-box mt-2">
-            <div class="protocol-text"><strong>Saran SOP:</strong> Segera isolasi dari area penyimpanan utama dan buat tiket write-off.</div>
+          <div style="margin-top: 1.5rem; padding: 1rem; background: #eff6ff; border-radius: var(--radius);">
+            <strong style="color: #1e40af;">📋 SOP Recommendation:</strong>
+            <p style="color: #475569; margin-top: 0.5rem;">Immediately isolate from storage area and create write-off ticket.</p>
           </div>
         </div>
       `;
-      document.getElementById('resultContent').innerHTML = html;
     }
 
     async function submitRecord() {
-      const ticketNum = 'WO-2026-' + String(Math.floor(Math.random() * 899) + 100);
-      const note = document.getElementById('wasteNote').value || `Insiden ${activeCategory}`;
-
       try {
         const payload = {
-          barcode_value: activeBarcode,
-          ingredient_name: activeIngredient,
-          note: note,
-          ocr_weight: activeWeight
+          barcode_value: currentBarcode,
+          ingredient_name: currentIngredient,
+          note: document.getElementById('wasteNote').value || currentIngredient,
+          ocr_weight: currentWeight
         };
 
         const res = await fetch('/api/waste-log/analyze', {
@@ -1135,37 +1038,38 @@
 
         const now = new Date();
         const timeStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-
+        
         transactions.unshift({
           time: timeStr,
-          id: ticketNum,
-          name: activeIngredient,
-          sku: activeBarcode,
+          name: currentIngredient,
           cat: data.ai.class,
-          weight: activeWeight,
-          loss: data.financial_impact ? data.financial_impact.total_loss_rupiah : activeLoss
+          weight: currentWeight,
+          loss: currentWeight * (data.ai.class === 'SPOILED' ? 120000 : 80000)
         });
 
         renderLedger();
-        alert(`Tersimpan: ${ticketNum}\n${activeIngredient}\n${formatIDR(activeLoss)}`);
-      } catch (e) { alert('Gagal menyimpan: ' + e.message); }
+        alert(`✓ Saved Successfully!\n\nTicket ID: WO-${Math.floor(Math.random()*900)+100}\n${currentIngredient}\n${formatIDR(transactions[0].loss)}`);
+      } catch (e) { alert('Save failed: ' + e.message); }
     }
 
     function renderLedger() {
-      let totalKg = 0, totalRp = 0;
       const tbody = document.getElementById('ledgerBody');
       tbody.innerHTML = '';
+      let totalKg = 0, totalRp = 0;
 
       transactions.forEach(row => {
         totalKg += row.weight;
         totalRp += row.loss;
+        
+        const badgeClass = row.cat === 'SPOILED' ? 'badge-danger' : 
+                          row.cat === 'EXPIRED' ? 'badge-warning' : 'badge-success';
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${row.time}</td>
-          <td>${row.id}</td>
-          <td><strong>${row.name}</strong></td>
-          <td><span class="category-badge category-${row.cat}" style="font-size:0.7rem;padding:4px 8px;">${row.cat}</span></td>
-          <td>${row.weight.toFixed(2)} kg</td>
+          <td><strong>${row.time}</strong></td>
+          <td>${row.name}</td>
+          <td><span class="category-badge ${badgeClass}" style="font-size:0.7rem;padding:0.25rem 0.75rem;">${row.cat}</span></td>
+          <td><strong>${row.weight.toFixed(2)} kg</strong></td>
           <td class="text-danger"><strong>${formatIDR(row.loss)}</strong></td>
         `;
         tbody.appendChild(tr);
@@ -1173,23 +1077,39 @@
 
       document.getElementById('totalWeight').innerText = totalKg.toFixed(2) + ' kg';
       document.getElementById('totalLoss').innerText = formatIDR(totalRp);
+      document.getElementById('transactionCount').innerText = transactions.length;
     }
 
-    function exportCSV() {
-      let csv = "Waktu,Tiket,Bahan,Kategori,Berat,Nilai\n";
-      transactions.forEach(row => {
-        csv += `${row.time},${row.id},"${row.name}",${row.cat},${row.weight},${row.loss}\n`;
-      });
-      const blob = new Blob([csv], {type: 'text/csv'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'KitchenGuard_Ledger.csv';
-      a.click();
+    function toggleVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert('Browser tidak mendukung voice input. Gunakan Chrome atau Edge.');
+        return;
+      }
+
+      if (isRecording) {
+        recognizer.stop();
+        return;
+      }
+
+      recognizer = new SpeechRecognition();
+      recognizer.lang = 'id-ID';
+      recognizer.onstart = () => { isRecording = true; document.getElementById('voiceBtn').classList.add('recording'); };
+      recognizer.onresult = (e) => { document.getElementById('wasteNote').value = e.results[0][0].transcript; analyzeText(); };
+      recognizer.onend = () => { isRecording = false; document.getElementById('voiceBtn').classList.remove('recording'); };
+      recognizer.start();
+    }
+
+    function setQuickReason(reason) {
+      document.getElementById('wasteNote').value = reason;
+      analyzeText();
     }
 
     // Initialize
-    renderLedger();
+    document.addEventListener('DOMContentLoaded', () => {
+      renderLedger();
+      setTimeout(startCamera, 1000);
+    });
   </script>
 </body>
 </html>
