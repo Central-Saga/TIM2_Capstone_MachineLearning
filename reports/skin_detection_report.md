@@ -2,16 +2,16 @@
 
 ## Model Information
 - Version: 1.0.0
-- Created: 2026-09-16 09:57:29.285034
-- Total Samples: 3600
+- Created: 2026-09-18 21:12:10.241971
+- Total Samples: 1000
 - Features Used: 6
 
 ## Performance Metrics
 ### Category Classification (HAND vs FACE)
-- Accuracy: 0.5014
+- Accuracy: 1.0000
 
 ### Skin Type Classification (Fair Skin Types)
-- Accuracy: 0.7292
+- Accuracy: 0.9200
 
 ## Categories Detected
 - FACE

@@ -63,23 +63,29 @@ Output:
 ### Step 3: Train Models
 
 ```bash
-# Train Skin Detection Model
-python train_skin_model.py
+# Train Skin Detection Model (Category & Skin Type)
+python scripts/train_skin_model.py
 
-# Train Waste Classifier Model  
-python train_improved_waste_model.py
+# Train Waste Classifier Model (TF-IDF + Ensemble)
+python scripts/train_improved_waste_model.py
 ```
 
-**Results:**
-- Skin Type Classifier Accuracy: **90%**
-- Waste Classifier Accuracy: **100%**
+**Results (Held-out Test Evaluation & CV):**
+- Skin Detection Category Accuracy: **100.0%** (HAND vs FACE)
+- Skin Detection Skin Type Accuracy: **92.0%** (FAIR_1, FAIR_2, FAIR_3)
+- Waste Classifier Ensemble Accuracy: **100.0%** (Held-out 20% test split, 576 samples)
+- Waste Classifier 5-Fold Cross-Validation: **1.0000 ± 0.0000** (Pipeline with leakage-free folds)
 
 ### Step 4: Deploy to Android
 
-1. Copy models ke folder Android:
+Android client operates primarily via FastAPI REST API (`docs/ANDROID_API_CONTRACT.md`) with local rule-based fallback:
+1. Helper Java & class maps:
+   - `models/android/WasteClassifierHelper.java`
+   - `models/android/android_classification_map.json`
+   - `models/android/android_encoding_map.json`
+2. Run backend:
 ```bash
-xcopy ..\models\*.joblib android\app\models\ /E /I /Y
-xcopy ..\models\android*.json android\app\models\ /E /I /Y
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 2. Buka Android Studio:

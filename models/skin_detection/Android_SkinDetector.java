@@ -27,9 +27,9 @@ public class SkinDetectorHelper {
         ByteBuffer buffer = FileUtil.loadMappedFile(context, "skin_model.tflite");
         tflite = new Interpreter(buffer);
         
-        // Load label mappings
-        this.categoryClasses = new int[]{0, 1}; // HAND, FACE
-        this.skinTypeClasses = new int[]{0, 1, 2, 3}; // FAIR_1, FAIR_2, FAIR_3
+        // Load label mappings (aligned with android_encoding_map.json: 0=FACE, 1=HAND)
+        this.categoryClasses = new int[]{0, 1}; // 0: FACE, 1: HAND
+        this.skinTypeClasses = new int[]{0, 1, 2}; // FAIR_1, FAIR_2, FAIR_3
     }
     
     /**

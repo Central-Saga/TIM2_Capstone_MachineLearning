@@ -1,7 +1,7 @@
 {
   "model_type": "skin_tone_detection",
   "version": "1.0.0",
-  "created_at": "2026-09-16 09:57:29.285034",
+  "created_at": "2026-09-18 21:12:10.241971",
   "categories": [
     "FACE",
     "HAND"
@@ -12,9 +12,9 @@
     "FAIR_3"
   ],
   "metrics": {
-    "category_accuracy": 0.5013888888888889,
-    "skin_type_accuracy": 0.7291666666666666,
-    "total_samples": 3600,
+    "category_accuracy": 1.0,
+    "skin_type_accuracy": 0.92,
+    "total_samples": 1000,
     "features_count": 6
   },
   "feature_names": [

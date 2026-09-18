@@ -183,43 +183,39 @@ class KitchenGuardVisionService:
         red_ratio = np.mean((r > g * 1.2) & (r > b * 1.2))
         yellow_ratio = np.mean((r > 120) & (g > 120) & (b < 100))
 
-        # Tentukan bahan berdasarkan hint atau deteksi warna dominan
+        # Tentukan bahan berdasarkan hint atau profil warna deterministik
         if hint_ingredient and hint_ingredient in self.catalog:
             ingredient_key = hint_ingredient
         else:
-            # Heuristik deteksi warna/fitur
-            if red_ratio > 0.35 and brightness > 80:
-                ingredient_key = random.choice(["tomato", "apple", "strawberry", "daging_sapi"])
+            # Klasifikasi warna deterministik tanpa random.choice
+            if red_ratio > 0.35:
+                ingredient_key = "daging_sapi" if brightness <= 90 else "tomato"
             elif green_ratio > 0.30:
-                ingredient_key = random.choice(["bellpepper", "cucumber"])
+                ingredient_key = "cucumber" if mean_g < 130 else "bellpepper"
             elif yellow_ratio > 0.25:
-                ingredient_key = random.choice(["banana", "orange", "mango"])
-            elif red_ratio > 0.30 and brightness <= 80:
-                ingredient_key = "daging_sapi"
+                ingredient_key = "banana"
             else:
-                ingredient_key = random.choice(list(self.catalog.keys()))
+                ingredient_key = "apple"
 
         item_info = self.catalog[ingredient_key]
 
-        # Tentukan status kebusukan (Freshness AI)
-        # Jika terdapat dark_ratio tinggi atau kecokelatan kusam -> SPOILED
+        # Tentukan status kebusukan (Deterministic Freshness AI Heuristic)
+        blemish_percentage = round(float(dark_ratio * 100.0), 1)
+        
         if dark_ratio > 0.18 or (mean_r < 80 and mean_g < 80 and mean_b < 80):
             predicted_class = "SPOILED"
-            confidence = round(random.uniform(0.92, 0.99), 4)
-            blemish_percentage = round(random.uniform(35.0, 75.0), 1)
+            confidence = round(float(min(0.99, 0.88 + (dark_ratio * 0.3))), 4)
             shelf_life_days = 0
             visual_evidence = f"Terdeteksi area pembusukan seluas {blemish_percentage}%, warna kusam menghitam berair."
         elif dark_ratio > 0.08:
             predicted_class = "ACCEPTABLE"
-            confidence = round(random.uniform(0.86, 0.94), 4)
-            blemish_percentage = round(random.uniform(10.0, 25.0), 1)
+            confidence = round(float(min(0.95, 0.85 + (dark_ratio * 0.5))), 4)
             shelf_life_days = 1
             visual_evidence = f"Terdapat memar/bercak ringan seluas {blemish_percentage}%. Perlu segera digunakan."
         else:
             predicted_class = "FRESH"
-            confidence = round(random.uniform(0.91, 0.99), 4)
-            blemish_percentage = round(random.uniform(0.5, 4.0), 1)
-            shelf_life_days = random.randint(3, 7)
+            confidence = round(float(max(0.88, 0.98 - (dark_ratio * 1.2))), 4)
+            shelf_life_days = max(3, int(7 - (dark_ratio * 30)))
             visual_evidence = f"Kondisi visual segar alami ({100 - blemish_percentage:.1f}% mulus), warna cerah normal."
 
         # Terapkan PRD Confidence Gate
@@ -246,7 +242,7 @@ class KitchenGuardVisionService:
                 "confidence": confidence,
                 "confidence_threshold": confidence_threshold,
                 "gate_status": gate_status,
-                "model_version": "freshness-tflite-v1.1",
+                "model_version": "freshness-vision-heuristics-v1.1",
                 "inference_time_ms": inference_time_ms
             },
             "ingredient": {

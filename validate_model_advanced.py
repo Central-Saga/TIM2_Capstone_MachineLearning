@@ -15,6 +15,7 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
@@ -76,26 +77,26 @@ print("\n" + "="*70)
 print("STEP 3: 5-Fold Cross-Validation (Strict Test)")
 print("="*70)
 
-X = df['clean_text'].values
-y = df['category'].map({cat: idx for idx, cat in enumerate(sorted(df['category'].unique()))}).values
+X = np.array(df['clean_text'].tolist(), dtype=object)
+y = np.array(df['category'].map({cat: idx for idx, cat in enumerate(sorted(df['category'].unique()))}).tolist(), dtype=int)
 
-# TF-IDF Vectorization
+# Pipeline to prevent data leakage during cross-validation
 vectorizer = TfidfVectorizer(
     max_features=3000,
     ngram_range=(1, 2),
     min_df=2,
     sublinear_tf=True
 )
-X_tfidf = vectorizer.fit_transform(X)
-
-# Cross-validation
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 mnb = MultinomialNB(alpha=0.1)
+pipe = Pipeline([('tfidf', vectorizer), ('clf', mnb)])
 
-cv_scores = cross_val_score(mnb, X_tfidf, y, cv=cv, scoring='accuracy')
-cv_f1 = cross_val_score(mnb, X_tfidf, y, cv=cv, scoring='f1_macro')
-cv_precision = cross_val_score(mnb, X_tfidf, y, cv=cv, scoring='precision_macro')
-cv_recall = cross_val_score(mnb, X_tfidf, y, cv=cv, scoring='recall_macro')
+# Cross-validation with TF-IDF fit strictly within each fold (no leakage)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+cv_scores = cross_val_score(pipe, X, y, cv=cv, scoring='accuracy')
+cv_f1 = cross_val_score(pipe, X, y, cv=cv, scoring='f1_macro')
+cv_precision = cross_val_score(pipe, X, y, cv=cv, scoring='precision_macro')
+cv_recall = cross_val_score(pipe, X, y, cv=cv, scoring='recall_macro')
 
 print(f"\n📈 Cross-Validation Results (5-fold):\n")
 print(f"{'Fold':<6} {'Accuracy':<12} {'Precision':<12} {'Recall':<12} {'F1-Macro':<12}")
@@ -109,8 +110,9 @@ print(f"  Precision: {cv_precision.mean():.4f} ± {cv_precision.std():.4f}")
 print(f"  Recall   : {cv_recall.mean():.4f} ± {cv_recall.std():.4f}")
 print(f"  F1-Macro : {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-# Overfitting Detection
-train_accuracy = mnb.fit(X_tfidf, y).score(X_tfidf, y)
+# Overfitting Detection: Fit on full training set
+pipe.fit(X, y)
+train_accuracy = pipe.score(X, y)
 test_accuracy_mean = cv_scores.mean()
 
 print(f"\n🔍 OVERFITTING ANALYSIS:")
@@ -176,8 +178,7 @@ inv_cat_map = {idx: cat for cat, idx in cat_map.items()}
 y_noisy = noise_df['category'].map(cat_map).values
 
 # Predict on noisy data
-X_noisy_tfidf = vectorizer.transform(X_noisy)
-pred_noisy = mnb.predict(X_noisy_tfidf)
+pred_noisy = pipe.predict(X_noisy)
 
 noisy_accuracy = accuracy_score(y_noisy, pred_noisy)
 print(f"\n🧪 Noise Robustness Test (20% text corruption):")
@@ -291,7 +292,7 @@ print("="*70)
 
 summary = {
     "Cross-Validation": f"{cv_f1.mean():.4f} ± {cv_f1.std():.4f}",
-    "Overfitting Risk": "Low/Medium/High" if abs(train_accuracy - test_accuracy_mean) < 0.02 else "Medium" if abs(train_accuracy - test_accuracy_mean) < 0.05 else "HIGH",
+    "Overfitting Risk": "LOW" if abs(train_accuracy - test_accuracy_mean) < 0.02 else "MEDIUM" if abs(train_accuracy - test_accuracy_mean) < 0.05 else "HIGH",
     "Noise Robustness": f"{noisy_accuracy:.4f}" if noisy_accuracy >= 0.85 else f"{noisy_accuracy:.4f} (NEEDS IMPROVEMENT)",
     "Recommended Threshold": "0.85",
     "Multi-Modal Ready": "YES (Phase 1: Data Collection)"

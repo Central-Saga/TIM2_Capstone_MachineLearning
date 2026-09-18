@@ -21,10 +21,17 @@ class KitchenGuardTextPredictor:
     """
     def __init__(self, models_dir: str = "models"):
         self.models_dir = models_dir
-        self.model_path = os.path.join(models_dir, "waste_classifier_model.joblib")
-        self.vectorizer_path = os.path.join(models_dir, "tfidf_vectorizer.joblib")
-        self.encoder_path = os.path.join(models_dir, "label_encoder.joblib")
-        self.metadata_path = os.path.join(models_dir, "model_metadata.json")
+        
+        # Check models/waste_classification if exists
+        wc_dir = os.path.join(models_dir, "waste_classification")
+        target_dir = wc_dir if os.path.exists(os.path.join(wc_dir, "waste_classifier_model.joblib")) else models_dir
+        
+        self.model_path = os.path.join(target_dir, "waste_classifier_model.joblib")
+        self.vectorizer_path = os.path.join(target_dir, "tfidf_vectorizer.joblib")
+        self.encoder_path = os.path.join(target_dir, "label_encoder.joblib")
+        self.metadata_path = os.path.join(target_dir, "waste_classifier_metadata.json")
+        if not os.path.exists(self.metadata_path):
+            self.metadata_path = os.path.join(target_dir, "model_metadata.json")
         
         self._load_artifacts()
         
@@ -75,13 +82,16 @@ class KitchenGuardTextPredictor:
                 "raw_text": raw_text,
                 "ai": {
                     "predicted_class": "UNCERTAIN",
+                    "class": "UNCERTAIN",
                     "confidence": 0.0,
+                    "gate_status": "UNCERTAIN",
                     "model_version": self.metadata.get("version", "kitchenguard-text-v1.0")
                 }
             }
             
         # 2. Representasi Teks (TF-IDF)
         text_vec = self.vectorizer.transform([clean_text])
+        is_oov = (text_vec.nnz == 0)
         
         # 3. Prediksi Probabilitas
         if hasattr(self.model, "predict_proba"):
@@ -98,13 +108,13 @@ class KitchenGuardTextPredictor:
             
         top_idx = int(np.argmax(probs))
         top_class = self.classes[top_idx]
-        confidence = float(probs[top_idx])
+        confidence = float(probs[top_idx]) if not is_oov else round(1.0 / len(self.classes), 4)
         
         inference_time_ms = round((time.perf_counter() - start_time) * 1000, 2)
         
         # 4. Penerapan Confidence Gate PRD
         # PRD KitchenGuard: confidence >= 85% -> decision support valid; < 85% -> UNCERTAIN
-        gate_status = "APPROVED" if confidence >= confidence_threshold else "UNCERTAIN"
+        gate_status = "APPROVED" if (confidence >= confidence_threshold and not is_oov) else "UNCERTAIN"
         effective_class = top_class if gate_status == "APPROVED" else "UNCERTAIN"
         
         # Probabilitas seluruh kelas

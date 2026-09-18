@@ -28,7 +28,7 @@ public class MachineLearningUtils {
     private Map<Integer, String> indexToCategory;
     private List<String> skinTypeClasses;
     
-    private static final int[] CATEGORY_CLASSES = {0, 1}; // HAND, FACE
+    private static final int[] CATEGORY_CLASSES = {0, 1}; // 0: FACE, 1: HAND (matches android_encoding_map.json)
     
     public MachineLearningUtils(Context context) throws IOException {
         loadModels(context);
@@ -50,10 +50,10 @@ public class MachineLearningUtils {
             skinDetector = null;
         }
         
-        // Setup category classes mapping
+        // Setup category classes mapping (aligned with android_encoding_map.json)
         categoryClasses = new ArrayList<>();
-        categoryClasses.add("HAND");
         categoryClasses.add("FACE");
+        categoryClasses.add("HAND");
         indexToCategory = new HashMap<>();
         for (int i = 0; i < categoryClasses.size(); i++) {
             indexToCategory.put(i, categoryClasses.get(i));

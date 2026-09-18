@@ -83,19 +83,35 @@ def load_models() -> bool:
     """Memuat artefak model klasifikasi limbah dan TF-IDF vectorizer."""
     global model, vectorizer, class_names, metadata
     try:
-        model_path = MODELS_DIR / "waste_classifier_model.joblib"
-        vec_path = MODELS_DIR / "tfidf_vectorizer.joblib"
-        meta_path = MODELS_DIR / "waste_classifier_metadata.json"
+        search_dirs = [
+            MODELS_DIR / "waste_classification",
+            MODELS_DIR
+        ]
+        model_path = None
+        vec_path = None
+        meta_path = None
 
-        if not model_path.exists() or not vec_path.exists():
-            logger.warning(f"File model atau vectorizer tidak ditemukan di {MODELS_DIR}")
+        for d in search_dirs:
+            mp = d / "waste_classifier_model.joblib"
+            vp = d / "tfidf_vectorizer.joblib"
+            if mp.exists() and vp.exists():
+                model_path = mp
+                vec_path = vp
+                for mf in ["waste_classifier_metadata.json", "metadata.json"]:
+                    if (d / mf).exists():
+                        meta_path = d / mf
+                        break
+                break
+
+        if not model_path or not vec_path:
+            logger.warning(f"File model atau vectorizer tidak ditemukan di {search_dirs}")
             return False
 
-        logger.info("Memuat model Machine Learning KitchenGuard...")
+        logger.info(f"Memuat model Machine Learning KitchenGuard dari {model_path.parent}...")
         model = joblib.load(str(model_path))
         vectorizer = joblib.load(str(vec_path))
 
-        if meta_path.exists():
+        if meta_path and meta_path.exists():
             with open(meta_path, "r", encoding="utf-8") as f:
                 metadata = json.load(f)
                 class_names = metadata.get("classes", [])
@@ -109,6 +125,9 @@ def load_models() -> bool:
         logger.error(f"Gagal memuat model: {exc}", exc_info=True)
         return False
 
+# Panggil pemuatan model saat inisialisasi modul agar siap saat diimport
+load_models()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Siklus hidup aplikasi saat startup dan shutdown."""
@@ -117,9 +136,10 @@ async def lifespan(app: FastAPI):
     REPORTS_DIR.mkdir(exist_ok=True)
     DATA_DIR.mkdir(exist_ok=True)
     
-    loaded = load_models()
-    if not loaded:
-        logger.warning("Peringatan: Model ML belum siap. Sistem akan mengembalikan error 503 saat inferensi.")
+    if model is None or vectorizer is None:
+        loaded = load_models()
+        if not loaded:
+            logger.warning("Peringatan: Model ML belum siap. Sistem akan mengembalikan error 503 saat inferensi.")
     yield
     logger.info("Menghentikan layanan KitchenGuard CSM v3.0...")
 
@@ -137,11 +157,11 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# CORS Middleware
+# CORS Middleware (allow_credentials=False for wildcard origins to satisfy CORS spec & security)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -246,14 +266,34 @@ def predict_waste(text: str, threshold: float = 0.85) -> Dict[str, Any]:
 
     start_time = time.perf_counter()
     clean_text = preprocess_text(text)
+    
+    # Tangani input kosong
+    if not clean_text or clean_text.strip() == "":
+        inference_time = round((time.perf_counter() - start_time) * 1000, 2)
+        default_prob = round(1.0 / len(class_names), 4) if class_names else 0.0
+        prob_dist = {cls: default_prob for cls in class_names}
+        return {
+            "task": "waste_text_classification",
+            "class": "UNCERTAIN",
+            "predicted_class": "UNCERTAIN",
+            "raw_predicted_class": "UNCERTAIN",
+            "confidence": 0.0,
+            "gate_status": "UNCERTAIN",
+            "action_recommendation": "UNCERTAIN: Teks kosong atau tidak mengandung kata yang dapat diidentifikasi. Lakukan verifikasi manual.",
+            "probabilities": prob_dist,
+            "inference_time_ms": inference_time,
+            "model_version": metadata.get("model_info", {}).get("version", "3.0.0"),
+            "preprocessed_text": clean_text
+        }
+
     X = vectorizer.transform([clean_text])
+    is_oov = (X.nnz == 0)
     
     pred_idx = model.predict(X)[0]
     
     if hasattr(model, "predict_proba"):
         pred_proba = model.predict_proba(X)[0]
     else:
-        # Fallback jika model tidak memiliki predict_proba (misal LinearSVC tanpa calibrated)
         pred_proba = [1.0 if i == pred_idx else 0.0 for i in range(len(class_names))]
 
     # Tentukan nama kelas prediksi
@@ -266,9 +306,15 @@ def predict_waste(text: str, threshold: float = 0.85) -> Dict[str, Any]:
     except (ValueError, TypeError):
         predicted_class = str(pred_idx)
 
-    confidence = float(pred_proba[idx]) if 0 <= idx < len(pred_proba) else 0.95
-    gate_status = "APPROVED" if confidence >= threshold else "UNCERTAIN"
-    action = ACTION_GUIDE.get(predicted_class, "Review and document root cause.")
+    # Tangani teks Out of Vocabulary (OOV) agar tidak menghasilkan confidence tinggi palsu
+    if is_oov:
+        confidence = round(1.0 / len(class_names), 4) if class_names else 0.1
+        gate_status = "UNCERTAIN"
+        action = "UNCERTAIN: Teks berada di luar kosakata model. Staf dapur wajib melakukan verifikasi manual."
+    else:
+        confidence = float(pred_proba[idx]) if (0 <= idx < len(pred_proba)) else 0.0
+        gate_status = "APPROVED" if confidence >= threshold else "UNCERTAIN"
+        action = ACTION_GUIDE.get(predicted_class, "Review and document root cause.")
 
     prob_dist = {cls: round(float(pred_proba[i]), 4) for i, cls in enumerate(class_names) if i < len(pred_proba)}
     inference_time = round((time.perf_counter() - start_time) * 1000, 2)
@@ -313,12 +359,16 @@ def serve_home():
 def healthcheck():
     """Healthcheck endpoint untuk pemantauan koneksi backend dan Android."""
     is_ready = model is not None and vectorizer is not None
+    ver = metadata.get("model_info", {}).get("version", "3.0.0")
     return {
         "status": "healthy" if is_ready else "degraded",
         "service": "KitchenGuard CSM v3.0",
         "ml_available": is_ready,
-        "model_version": metadata.get("model_info", {}).get("version", "3.0.0"),
+        "model_loaded": is_ready,
+        "version": ver,
+        "model_version": ver,
         "categories_count": len(class_names),
+        "active_classes": class_names,
         "timestamp": time.time()
     }
 
@@ -584,20 +634,45 @@ def get_vision_samples():
 @app.post("/api/ocr/scan-scale", tags=["Digital Scale OCR"])
 def scan_scale_ocr(req: OCRScaleRequest):
     """Membaca angka berat dan satuan dari layar timbangan digital dengan ambang auto-fill 90%."""
-    reading_str = req.scale_value_hint or "1.45 kg"
+    if not req.scale_value_hint and not req.image_base64:
+        raise HTTPException(
+            status_code=400,
+            detail="Wajib menyertakan 'image_base64' atau 'scale_value_hint' untuk membaca timbangan."
+        )
+
+    reading_str = req.scale_value_hint
     
-    match = re.search(r"(\d+[\.,]?\d*)\s*([a-zA-Z]*)", reading_str)
-    if match:
+    # Jika gambar diberikan namun tidak ada hint teks, coba ekstraksi atau tandai butuh pembacaan
+    if not reading_str and req.image_base64:
+        # Placeholder OCR parsing untuk base64 image jika tidak ada engine OCR eksternal terpasang
+        reading_str = "0.0 kg"
+
+    match = re.search(r"(\d+[\.,]?\d*)\s*([a-zA-Z]*)", reading_str) if reading_str else None
+    if match and float(match.group(1).replace(",", ".")) > 0:
         raw_val = match.group(1).replace(",", ".")
         weight = float(raw_val)
         unit = match.group(2).lower() if match.group(2) else "kg"
-        confidence = 0.94
+        confidence = 0.94 if req.scale_value_hint else 0.85
     else:
-        weight = 1.0
+        weight = 0.0
         unit = "kg"
-        confidence = 0.80
+        confidence = 0.0
 
     auto_fill_allowed = confidence >= 0.90
+
+    if confidence == 0.0:
+        return {
+            "status": "NOT_FOUND",
+            "ocr": {
+                "raw_text": reading_str or "",
+                "weight": 0.0,
+                "unit": "kg",
+                "confidence": 0.0,
+                "auto_filled": False,
+                "requires_confirmation": True
+            },
+            "message": "Tidak dapat mendeteksi angka berat yang valid dari input timbangan."
+        }
 
     return {
         "status": "SUCCESS",

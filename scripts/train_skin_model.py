@@ -13,10 +13,16 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 import json
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 # Konfigurasi
 DATA_PATH = os.path.join("data", "skin_detection_dataset.csv")
-MODELS_DIR = "models"
+MODELS_DIR = os.path.join("models", "skin_detection")
 REPORTS_DIR = "reports"
 
 os.makedirs(MODELS_DIR, exist_ok=True)
@@ -162,9 +168,9 @@ public class SkinDetectorHelper {
         ByteBuffer buffer = FileUtil.loadMappedFile(context, "skin_model.tflite");
         tflite = new Interpreter(buffer);
         
-        // Load label mappings
-        this.categoryClasses = new int[]{0, 1}; // HAND, FACE
-        this.skinTypeClasses = new int[]{0, 1, 2, 3}; // FAIR_1, FAIR_2, FAIR_3
+        // Load label mappings (aligned with android_encoding_map.json: 0=FACE, 1=HAND)
+        this.categoryClasses = new int[]{0, 1}; // 0: FACE, 1: HAND
+        this.skinTypeClasses = new int[]{0, 1, 2}; // FAIR_1, FAIR_2, FAIR_3
     }
     
     /**

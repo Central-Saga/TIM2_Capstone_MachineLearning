@@ -47,9 +47,12 @@ data/temp/
 data/*.jsonl
 *.csv
 
-# Whitelist core training/validation benchmark dataset for CI
+# Whitelist core training/validation benchmark datasets for CI & clean clone
 !data/
-!data/kitchenguard_waste_dataset.csv
+!data/*.csv
+data/raw/
+data/processed/
+data/temp/
 
 # Android Build & Outputs
 .gradle/
