@@ -1,24 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Base application theme: Material 3 Light (Dominant White & Orange) -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base Application Theme - White/Dominant with Orange Accent -->
     <style name="Theme.KitchenGuardCSM" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Status Bar -->
-        <item name="android:statusBarColor">@color/white</item>
-        <item name="android:windowLightStatusBar">true</item>
-
-        <!-- Primary & Accent Colors -->
+        <!-- Primary brand color -->
         <item name="colorPrimary">@color/orange_primary</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/orange_light</item>
-        <item name="colorOnPrimaryContainer">@color/orange_dark</item>
-
-        <!-- Surface & Background -->
-        <item name="android:colorBackground">@color/background_white</item>
-        <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-
-        <!-- Navigation Bar -->
+        <item name="colorPrimaryDark">@color/orange_dark</item>
+        <item name="colorAccent">@color/orange_primary</item>
+        
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/orange_400</item>
+        <item name="colorSecondaryVariant">@color/orange_dark</item>
+        
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/white</item>
         <item name="android:navigationBarColor">@color/white</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        
+        <!-- Card styling -->
+        <item name="cardViewStyle">@style/CardView.Rounded</item>
+        
+        <!-- Button styling -->
+        <item name="materialButtonStyle">@style/Widget.KitchenGuard.Button</item>
+        <item name="materialIconButtonStyle">@style/Widget.KitchenGuard.IconButton</item>
+        
+        <!-- TextInput styling -->
+        <item name="textInputStyle">@style/Widget.KitchenGuard.TextInputLayout</item>
     </style>
+
+    <!-- Rounded Card View Style -->
+    <style name="CardView.Rounded" parent="CardView">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+    </style>
+
+    <!-- Primary Button Style - Orange -->
+    <style name="Widget.KitchenGuard.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/orange_primary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="elevation">2dp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <!-- Outlined Button Style -->
+    <style name="Widget.KitchenGuard.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/orange_primary</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:textColor">@color/orange_primary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- Icon Button Style -->
+    <style name="Widget.KitchenGuard.IconButton" parent="Widget.Material3.Button.IconButton">
+        <item name="iconTint">@color/orange_primary</item>
+        <item name="tint">@color/orange_primary</item>
+    </style>
+
+    <!-- TextInputLayout Style -->
+    <style name="Widget.KitchenGuard.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/orange_primary</item>
+        <item name="hintTextColor">@color/orange_primary</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+    </style>
+
+    <!-- Tab Layout Style -->
+    <style name="TabLayout.KitchenGuard" parent="Widget.Material3.TabLayout">
+        <item name="tabIndicatorColor">@color/orange_primary</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabTextColor">@color/text_muted</item>
+        <item name="tabSelectedTextColor">@color/orange_primary</item>
+        <item name="tabTextAppearance">@style/TabTextAppearance</item>
+    </style>
+
+    <!-- Tab Text Appearance -->
+    <style name="TabTextAppearance" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Chip Style -->
+    <style name="Chip.KitchenGuard.Filter" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/white</item>
+        <item name="chipStrokeColor">@color/orange_primary</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">8dp</item>
+    </style>
+
 </resources>
