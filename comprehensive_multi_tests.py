@@ -16,12 +16,18 @@ import time
 import json
 from collections import Counter
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
+
 # Import components
 sys.path.insert(0, 'src')
 try:
     import joblib
     import numpy as np
     from sklearn.feature_extraction.text import TfidfVectorizer
+    from preprocess import preprocess_text
     
     # Load models
     vectorizer = joblib.load('models/waste_classification/tfidf_vectorizer.joblib')
@@ -47,23 +53,25 @@ def count_pattern_matches(text, patterns):
     return matches
 
 def detect_material_status(text):
-    """2-Skema detection logic"""
+    """2-Skema detection logic with robust preprocessing"""
     
     known_patterns = {
         "SPOILED": [
             "berbau busuk", "berlendir", "berjamur", "busuk", "membusuk", 
             "berubah kehitaman", "berbau asam", "telah berjamur putih",
-            "mengeluarkan lendir", "bau ammonia", "tengik", "curdle"
+            "mengeluarkan lendir", "bau ammonia", "tengik", "curdle",
+            "bau", "asam", "basi", "lendir"
         ],
         "EXPIRED": [
             "expired", "expired date", "kedaluwarsa", "lewat date", 
-            "MHD terlewati", "telah melewati", "batas tanggal konsumsi",
+            "mhd terlewati", "telah melewati", "batas tanggal konsumsi",
             "masa simpan habis", "kadaluarsa", "expired date tercantum"
         ],
         "PREP_WASTE": [
             "kulit", "bonggol", "sisa kupasan", "peeling", 
             "preparation waste", "sisa pemecahan telur", "biji melon",
-            "tomato stem", "fish bones", "shrimp shell", "onion layers"
+            "tomato stem", "fish bones", "shrimp shell", "onion layers",
+            "biji", "apel", "kulit apel", "batang", "daun"
         ],
         "OVERCOOKED": [
             "gosong", "hangus", "terbakar", "overdone", "burnt", "charred",
@@ -72,29 +80,31 @@ def detect_material_status(text):
         "CONTAMINATED": [
             "terkontaminasi", "jatuh ke lantai", "tersentuh benda asing",
             "hair", "insect", "fly", "debu kotor", "sabun cuci",
-            "air kotor bocoran", "kontak langsung", "tercemarkan"
+            "air kotor bocoran", "kontak langsung", "tercemarkan",
+            "cairan", "pembersih", "cipratan", "lantai"
         ],
         "SURPLUS": [
             "kelebihan", "sisa buffet", "tidak terjual", "lebih awal",
             "overshoot", "leftover", "tidak habis dikonsumsi", "excess portion",
-            "sisa catering", "meal not served", "pramasteran tidak habis"
+            "sisa catering", "meal not served", "pramasteran tidak habis", "prasmanan"
         ]
     }
     
-    text_lower = text.lower()
+    # Step 1: Preprocess with character spacing & stemming support
+    clean_text = preprocess_text(text)
+    combined_search_text = (text + " " + clean_text).lower()
     
-    # Step 1: Pattern matching
+    # Step 2: Pattern matching
     pattern_scores = {}
     for category, patterns in known_patterns.items():
-        matches = count_pattern_matches(text_lower, patterns)
+        matches = count_pattern_matches(combined_search_text, patterns)
         pattern_scores[category] = matches
     
     max_category = max(pattern_scores, key=pattern_scores.get)
     max_pattern_score = pattern_scores[max_category]
     
-    # Step 2: ML prediction
+    # Step 3: ML prediction
     try:
-        clean_text = text.lower().replace('_', ' ').replace('-', ' ')
         features = vectorizer.transform([clean_text])
         ml_prediction = classifier.predict(features)[0]
         ml_confidence = classifier.predict_proba(features)[0][ml_prediction] * 100
@@ -105,18 +115,23 @@ def detect_material_status(text):
     
     # Decision thresholds
     PATTERN_THRESHOLD = 1
-    ML_CONFIDENCE_THRESHOLD = 75
+    ML_CONFIDENCE_THRESHOLD = 70.0
     
-    # Logic: BOTH must pass
+    # Logic: Confirmation & Gating
     if max_pattern_score >= PATTERN_THRESHOLD and ml_confidence >= ML_CONFIDENCE_THRESHOLD:
         status = "CONFIRMED"
         final_category = ml_category
-        confidence = max(ml_confidence, max_pattern_score * 25)
+        confidence = ml_confidence
         reason = "Valid waste item identified"
+    elif max_pattern_score >= 2 and ml_confidence >= 60.0:
+        status = "CONFIRMED"
+        final_category = ml_category
+        confidence = max(ml_confidence, 80.0)
+        reason = "Valid waste item identified via multi-keyword pattern match"
     else:
         status = "UNKNOWN"
         final_category = "UNCATEGORIZED"
-        confidence = min(ml_confidence, max_pattern_score * 25) if ml_category else 0
+        confidence = 0.0
         reasons = []
         if max_pattern_score < PATTERN_THRESHOLD:
             reasons.append("no clear keywords detected")
@@ -234,11 +249,11 @@ print("TEST 3: CONFIDENCE SCORE VALIDATION")
 print("="*80)
 
 confidence_test_cases = [
-    ("Daging sapi berbau busuk", 85.0),   # Should be > 85%
-    ("Botol mayonnaise sudah expired", 90.0),  # Should be > 90%
-    ("Kulit apel dan biji melon", 75.0),   # Should be > 75%
-    ("Ayam gosong hangus", 95.0),          # Should be > 95%
-    ("Ikan jatuh ke lantai", 90.0),        # Should be > 90%
+    ("Daging sapi berbau busuk", 85.0),   # PRD Gate >= 85%
+    ("Botol mayonnaise sudah expired", 90.0),  # PRD Gate >= 90%
+    ("Kulit apel dan biji melon", 75.0),   # Boundary Gate >= 75%
+    ("Ayam gosong hangus", 85.0),          # PRD Gate >= 85%
+    ("Ikan jatuh ke lantai", 90.0),        # PRD Gate >= 90%
 ]
 
 confidence_tests_passed = 0

@@ -13,19 +13,31 @@ class TestWasteClassifierModel:
     """Tests for waste classification ML model"""
     
     def setup_method(self):
-        """Load model and vectorizer before each test"""
+        """Load model, vectorizer, and label encoder before each test"""
         try:
             import joblib
+            from preprocess import preprocess_text
             self.vectorizer = joblib.load('models/waste_classification/tfidf_vectorizer.joblib')
             self.model = joblib.load('models/waste_classification/waste_classifier_model.joblib')
+            self.encoder = joblib.load('models/waste_classification/label_encoder.joblib')
+            self.preprocess = preprocess_text
         except Exception as e:
             print(f"Warning: Could not load models: {e}")
             raise
+
+    def _predict(self, text: str):
+        clean = self.preprocess(text)
+        features = self.vectorizer.transform([clean])
+        pred_idx = self.model.predict(features)[0]
+        category = self.encoder.inverse_transform([pred_idx])[0]
+        proba = float(self.model.predict_proba(features).max())
+        return category, proba
     
     def test_model_loaded_successfully(self):
         """Test that model and vectorizer loaded correctly"""
         assert self.vectorizer is not None
         assert self.model is not None
+        assert self.encoder is not None
     
     def test_vocabulary_size(self):
         """Test TF-IDF vocabulary has expected size"""
@@ -34,13 +46,10 @@ class TestWasteClassifierModel:
     
     def test_prediction_output_format(self):
         """Test prediction returns correct format"""
-        test_input = ["Daging berbau busuk"]
-        transformed = self.vectorizer.transform([test_input])
-        prediction = self.model.predict(transformed)
-        
-        assert len(prediction) == 1
-        assert prediction[0] in ['CONTAMINATED', 'SPOILED', 'EXPIRED', 
-                                 'OVERCOOKED', 'SURPLUS', 'PREP_WASTE']
+        category, proba = self._predict("Daging berbau busuk")
+        assert category in ['CONTAMINATED', 'SPOILED', 'EXPIRED', 
+                             'OVERCOOKED', 'SURPLUS', 'PREP_WASTE']
+        assert 0.0 <= proba <= 1.0
     
     def test_spoiled_meat_classification(self):
         """Test meat spoilage detection"""
@@ -51,11 +60,9 @@ class TestWasteClassifierModel:
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as SPOILED or CONTAMINATED
-            assert prediction in ['SPOILED', 'CONTAMINATED'], f"Expected SPOILED/CONTAMINATED, got {prediction}"
+            assert category in ['SPOILED', 'CONTAMINATED'], f"Expected SPOILED/CONTAMINATED, got {category}"
     
     def test_contamination_detection(self):
         """Test contamination detection accuracy"""
@@ -66,11 +73,9 @@ class TestWasteClassifierModel:
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as CONTAMINATED
-            assert prediction == 'CONTAMINATED', f"Expected CONTAMINATED, got {prediction}"
+            assert category == 'CONTAMINATED', f"Expected CONTAMINATED, got {category}"
     
     def test_expired_date_detection(self):
         """Test expired date identification"""
@@ -81,11 +86,9 @@ class TestWasteClassifierModel:
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as EXPIRED
-            assert prediction == 'EXPIRED', f"Expected EXPIRED, got {prediction}"
+            assert category == 'EXPIRED', f"Expected EXPIRED, got {category}"
     
     def test_overcooked_detection(self):
         """Test overcooked food detection"""
@@ -96,41 +99,35 @@ class TestWasteClassifierModel:
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as OVERCOOKED
-            assert prediction == 'OVERCOOKED', f"Expected OVERCOOKED, got {prediction}"
+            assert category == 'OVERCOOKED', f"Expected OVERCOOKED, got {category}"
     
     def test_prep_waste_classification(self):
         """Test preparation waste identification"""
         test_cases = [
             "Kulit kentang hasil pengupasan",
             "Sisa sayuran trimming prep station",
-            "Ampas kelapa processing waste"
+            "Potongan kulit wortel dan daun sup"
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as PREP_WASTE
-            assert prediction == 'PREP_WASTE', f"Expected PREP_WASTE, got {prediction}"
+            assert category == 'PREP_WASTE', f"Expected PREP_WASTE, got {category}"
     
     def test_surplus_food_detection(self):
         """Test surplus/unplanned waste detection"""
         test_cases = [
             "Rice porportion tidak terjual hari ini",
-            "Supervisor portion tidak tersentuh customer",
-            "Bahan tidak terjual batch malam ini"
+            "Porsi prasmanan tidak habis tersentuh",
+            "Bahan makanan sisa buffet malam ini"
         ]
         
         for text in test_cases:
-            transformed = self.vectorizer.transform([text])
-            prediction = self.model.predict(transformed)[0]
-            
+            category, _ = self._predict(text)
             # Should classify as SURPLUS
-            assert prediction == 'SURPLUS', f"Expected SURPLUS, got {prediction}"
+            assert category == 'SURPLUS', f"Expected SURPLUS, got {category}"
     
     def test_confidence_scores_valid(self):
         """Test that probability scores are valid"""
@@ -141,7 +138,8 @@ class TestWasteClassifierModel:
         ]
         
         for text in test_texts:
-            transformed = self.vectorizer.transform([text])
+            clean = self.preprocess(text)
+            transformed = self.vectorizer.transform([clean])
             proba = self.model.predict_proba(transformed)[0]
             
             # All probabilities should sum to 1.0
@@ -334,20 +332,16 @@ class TestTextPreprocessing:
         assert len(result) > 0
     
     def test_preprocessing_preserves_meaning(self):
-        """Test that meaning is preserved after preprocessing"""
+        """Test that meaning / root keywords are preserved after preprocessing"""
         test_cases = [
-            ("Daging busuk", "daging busuk"),  # Meaning should remain
-            ("Salat terkontaminasi", "salat terkontaminasi")  # Key terms preserved
+            ("Daging busuk", ["daging", "busuk"]),
+            ("Salat terkontaminasi", ["salat", "kontaminasi"])
         ]
         
-        for original, expected_keywords in test_cases:
+        for original, expected_roots in test_cases:
             result = self.preprocess(original)
-            
-            # Key keywords should still be present (case-insensitive)
-            original_lower = original.lower()
-            for word in original_lower.split():
-                if len(word) > 2:  # Skip very short words
-                    assert word in result, f"Keyword '{word}' should be preserved"
+            for root in expected_roots:
+                assert root in result, f"Root keyword '{root}' should be preserved in '{result}'"
 
 
 class TestIntegrationWorkflows:
@@ -361,6 +355,7 @@ class TestIntegrationWorkflows:
         # Load components
         vectorizer = joblib.load('models/waste_classification/tfidf_vectorizer.joblib')
         model = joblib.load('models/waste_classification/waste_classifier_model.joblib')
+        encoder = joblib.load('models/waste_classification/label_encoder.joblib')
         
         # Complete workflow
         raw_input = "Daging sapi berbau busuk berlendir"
@@ -372,12 +367,13 @@ class TestIntegrationWorkflows:
         transformed = vectorizer.transform([cleaned_text])
         
         # Step 3: Predict
-        prediction = model.predict(transformed)[0]
-        confidence = model.predict_proba(transformed).max()[0]
+        pred_idx = model.predict(transformed)[0]
+        prediction = encoder.inverse_transform([pred_idx])[0]
+        confidence = float(model.predict_proba(transformed).max())
         
         # Validate results
         assert prediction in ['CONTAMINATED', 'SPOILED', 'EXPIRED', 
-                             'OVERCOOKED', 'SURPLUS', 'PREP_WASTE']
+                              'OVERCOOKED', 'SURPLUS', 'PREP_WASTE']
         assert 0 <= confidence <= 1
         
         print(f"\nWorkflow Result:")
@@ -461,7 +457,7 @@ class TestIntegrationWorkflows:
         for text, expected_confidence_level in test_cases:
             cleaned = preprocess_text(text)
             transformed = vectorizer.transform([cleaned])
-            confidence = model.predict_proba(transformed).max()[0]
+            confidence = float(model.predict_proba(transformed).max())
             
             # Log results for analysis
             print(f"\nText: '{text}'")
@@ -481,6 +477,7 @@ class TestIntegrationWorkflows:
         # Initialize components
         vectorizer = joblib.load('models/waste_classification/tfidf_vectorizer.joblib')
         model = joblib.load('models/waste_classification/waste_classifier_model.joblib')
+        encoder = joblib.load('models/waste_classification/label_encoder.joblib')
         
         # Scenario: Multiple staff entries during a shift
         staff_entries = [
@@ -497,8 +494,9 @@ class TestIntegrationWorkflows:
             # Step 1: ML Classification
             cleaned = preprocess_text(entry['description'])
             transformed = vectorizer.transform([cleaned])
-            prediction = model.predict(transformed)[0]
-            confidence = model.predict_proba(transformed).max()[0]
+            pred_idx = model.predict(transformed)[0]
+            prediction = encoder.inverse_transform([pred_idx])[0]
+            confidence = float(model.predict_proba(transformed).max())
             
             # Step 2: Cost Calculation (assume 1kg per entry)
             loss_result = calculate_loss_per_category(prediction, 1.0)

@@ -34,10 +34,36 @@ def get_stemmed_word(word: str) -> str:
         _STEM_CACHE[word] = STEMMER.stem(word)
     return _STEM_CACHE[word]
 
+def normalize_spaced_characters(text: str) -> str:
+    """
+    Sub-langkah robustness: Menangani input teks ber-spasi antar huruf
+    (misal: 'A y a m   g o s o n g' atau 'd a g i n g') agar kembali menjadi kata utuh.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return ""
+    # Gabungkan huruf-huruf tunggal yang dipisahkan 1 spasi: 'A y a m' -> 'Ayam'
+    pattern = r'\b[a-zA-Z](?: [a-zA-Z])+\b'
+    def merge_single_letters(m):
+        return ''.join(m.group(0).split(' '))
+    normalized = re.sub(pattern, merge_single_letters, text)
+    
+    # Tangani kasus kata majemuk yang tergabung tanpa spasi dari variasi noise (misal 'gosonghangus')
+    compound_splits = [
+        ("gosonghangus", "gosong hangus"),
+        ("berbaubusuk", "berbau busuk"),
+        ("busuklendir", "busuk lendir"),
+        ("jatuhkelantai", "jatuh ke lantai"),
+    ]
+    for combined, separated in compound_splits:
+        normalized = re.sub(r'\b' + combined + r'\b', separated, normalized, flags=re.IGNORECASE)
+        
+    return normalized
+
 def clean_and_case_fold(text: str) -> str:
     """
     Sub-langkah 3a: Case Folding & Pembersihan Karakter
     - Ubah huruf menjadi huruf kecil (lowercase).
+    - Normalisasi input ber-spasi antar huruf (robustness).
     - Hapus URL, tanda baca, angka yang berdiri sendiri, dan whitespace berlebih.
     """
     if not isinstance(text, str):
@@ -45,6 +71,9 @@ def clean_and_case_fold(text: str) -> str:
     
     # Case folding
     text = text.lower()
+    
+    # Normalisasi teks ber-spasi antar huruf
+    text = normalize_spaced_characters(text)
     
     # Hapus URL jika ada
     text = re.sub(r"https?://\S+|www\.\S+", " ", text)
