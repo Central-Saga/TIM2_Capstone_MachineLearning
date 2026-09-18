@@ -43,8 +43,8 @@ class SkinDetectionActivity : AppCompatActivity() {
         private const val FAIR_SKIN_MIN_G = 180f
         private const val FAIR_SKIN_MIN_B = 160f
         
-        // Thresholds untuk klasifikasi
-        private const val CONFIDENCE_THRESHOLD = 0.75f
+        // Thresholds untuk klasifikasi (Diselaraskan dengan PRD & Backend Gate: 85%)
+        private const val CONFIDENCE_THRESHOLD = 0.85f
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
