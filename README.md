@@ -56,7 +56,7 @@ CAPSTONE_MACHINE_LEARNING/
 ```
 
 ✅ **All files have been reorganized!**  
-📚 See `docs/PROJECT_STRUCTURE.md` for complete details.
+📚 See `docs/PROJECT_STRUCTURE.md` and `docs/DOCUMENTATION_INDEX.md` for complete documentation navigation.
 ```
 
 ---
