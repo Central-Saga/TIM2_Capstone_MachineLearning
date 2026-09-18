@@ -274,6 +274,8 @@ def predict_waste(text: str, threshold: float = 0.85) -> Dict[str, Any]:
     inference_time = round((time.perf_counter() - start_time) * 1000, 2)
 
     return {
+        "task": "waste_text_classification",
+        "class": predicted_class,
         "predicted_class": predicted_class,
         "raw_predicted_class": predicted_class,
         "confidence": round(confidence, 4),

@@ -150,6 +150,17 @@ class KitchenGuardBarcodeService:
     def __init__(self):
         self.db = BARCODE_DATABASE
 
+    def lookup(self, barcode_value: str) -> Optional[Dict[str, Any]]:
+        """Lookup langsung raw dictionary bahan baku berdasarkan nilai barcode."""
+        if not barcode_value:
+            return None
+        clean_val = str(barcode_value).strip().replace(" ", "").replace("-", "")
+        if barcode_value in self.db:
+            return self.db[barcode_value]
+        if clean_val in self.db:
+            return self.db[clean_val]
+        return None
+
     def scan_and_lookup(self, barcode_value: str, detected_format: str = "EAN_13") -> Dict[str, Any]:
         """
         Menerima nilai barcode yang dipindai kamera Android (Google ML Kit Barcode Scanning)

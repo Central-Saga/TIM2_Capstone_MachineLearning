@@ -5,9 +5,10 @@ Trains YOLOv8 model untuk detect vegetables dari gambar/camera
 
 import os
 import yaml
-from ultralytics import YOLO
 import shutil
 import json
+import torch
+from ultralytics import YOLO
 
 # Configuration
 DATASET_DIR = "Datasets/vegatables"
@@ -76,9 +77,6 @@ training_args = {
     'optimizer': 'auto',
     'verbose': True
 }
-
-# Add PyTorch import
-import torch
 
 try:
     results = model.train(**training_args)

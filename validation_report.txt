@@ -1,4 +1,155 @@
-Traceback (most recent call last):
-  File "C:\CAPSTONE_MACHINE_LEARNING\validate_model_advanced.py", line 13, in <module>
-    import pandas as pd
-ModuleNotFoundError: No module named 'pandas'
+======================================================================
+KITCHENGUARD ML MODEL - ADVANCED VALIDATION
+======================================================================
+
+======================================================================
+STEP 1: Dataset Loading & Basic Analysis
+======================================================================
+
+✓ Dataset size: 1078 samples
+✓ Categories: ['PREP_WASTE', 'OVERCOOKED', 'CONTAMINATED', 'SURPLUS', 'SPOILED', 'EXPIRED']
+
+📊 Class Distribution:
+category
+OVERCOOKED      180
+CONTAMINATED    180
+SURPLUS         180
+SPOILED         180
+EXPIRED         180
+PREP_WASTE      178
+Name: count, dtype: int64
+
+======================================================================
+STEP 2: Text Preprocessing with Sastrawi Pipeline
+======================================================================
+✓ Preprocessed 1078 samples
+
+📝 Example transformation:
+Original: kulit wortel dan bonggol brokoli sisa pemecahan telur pembuatan adonan kue bakery pada talenan preparation.
+Cleaned:  kulit wortel bonggol brokoli sisa pecah telur buat adon kue bakery talenan preparation
+
+======================================================================
+STEP 3: 5-Fold Cross-Validation (Strict Test)
+======================================================================
+
+📈 Cross-Validation Results (5-fold):
+
+Fold   Accuracy     Precision    Recall       F1-Macro    
+------------------------------------------------------------
+1      1.0000      1.0000       1.0000      1.0000
+2      1.0000      1.0000       1.0000      1.0000
+3      1.0000      1.0000       1.0000      1.0000
+4      1.0000      1.0000       1.0000      1.0000
+5      1.0000      1.0000       1.0000      1.0000
+
+📊 Mean ± Standard Deviation:
+  Accuracy : 1.0000 ± 0.0000
+  Precision: 1.0000 ± 0.0000
+  Recall   : 1.0000 ± 0.0000
+  F1-Macro : 1.0000 ± 0.0000
+
+🔍 OVERFITTING ANALYSIS:
+  Training Accuracy: 1.0000
+  CV Test Accuracy : 1.0000
+  Gap              : 0.0000
+
+✓ GOOD: Training and CV scores are consistent!
+
+======================================================================
+STEP 4: Robustness Testing with Realistic Noise
+======================================================================
+
+🧪 Noise Robustness Test (20% text corruption):
+  Noisy Test Accuracy: 1.0000
+  ✓ ROBUST: Model handles realistic text variations well!
+
+📋 Sample Noisy Predictions:
+
+  Original  : daun selada hijau segar terkontaminasi pecahan beling piring kaca yang pecah di ...
+  Noisy     : daun selada hijau segar terkontaminasi pecahan beling Piring kaca yang p e c a h...
+  Prediction: [CONTAMINATED] | Actual: [CONTAMINATED] ✓
+
+  Original  : tomat merah berlendir tebal bau tengik busuk menusuk hidung di kulkas walk-in....
+  Noisy     : tomat merah berlendir tebal bau tengik busuk menusuk hidung di kulkas walk-in....
+  Prediction: [SPOILED] | Actual: [SPOILED] ✓
+
+  Original  : susu UHT full cream 1 liter batas aman konsumsi sudah lewat per hari ini saat ro...
+  Noisy     : susu UHT full cream 1 liter batas aman konsumsi s u d a h lewat per hari ini saa...
+  Prediction: [EXPIRED] | Actual: [EXPIRED] ✓
+
+======================================================================
+STEP 5: Dataset Expansion Strategy
+======================================================================
+✓ Found expansion scripts: ['generate_datasets_v2.py', 'generate_datasets_v3.py']
+✓ Training dataset size currently: 1078 samples across 6 PRD categories.
+
+======================================================================
+STEP 6: Confidence Threshold Calibration
+======================================================================
+
+📊 Prediction Confidence Distribution:
+  Mean Confidence: 99.99%
+  Std Confidence:  0.04%
+  Min Confidence:  99.63%
+  Max Confidence:  100.00%
+
+🎯 Confidence Threshold Analysis:
+Threshold    Coverage %      Conditional Acc
+--------------------------------------------------
+0.70         100.0           100.0          %
+0.75         100.0           100.0          %
+0.80         100.0           100.0          %
+0.85         100.0           100.0          %
+0.90         100.0           100.0          %
+
+💡 Recommended threshold: 0.85 (85%) - Balances precision and coverage
+
+======================================================================
+STEP 7: Multi-Modal Enhancement Planning
+======================================================================
+
+📱 CURRENT: Text-only classification
+✅ Strength: Fast, scalable, privacy-friendly
+⚠️ Limitation: Cannot detect visual anomalies (color changes, texture, etc.)
+
+🔄 PROPOSED: Hybrid Text + Visual Model
+
+📊 Visual Features to Add:
+  1. Skin tone detection from waste images
+  2. Color analysis (brown/black = spoiled/overcooked)
+  3. Texture recognition (slimy, dry, crispy)
+  4. Shape/morphology features
+
+🛠 Implementation Strategy:
+  Phase 1: Collect waste images with labels
+  Phase 2: Train CNN (ResNet/EfficientNet) for visual features
+  Phase 3: Fuse text + visual predictions (ensemble or attention)
+  Phase 4: Deploy hybrid model on Android
+
+📈 Expected Improvement:
+  - Better detection of early-stage spoilage
+  - Reduced false positives on ambiguous cases
+  - Confidence boost when both modalities agree
+
+======================================================================
+FINAL VALIDATION SUMMARY & RECOMMENDATIONS
+======================================================================
+
+📈 Model Performance Summary:
+  Cross-Validation         : 1.0000 ± 0.0000
+  Overfitting Risk         : Low/Medium/High
+  Noise Robustness         : 1.0000
+  Recommended Threshold    : 0.85
+  Multi-Modal Ready        : YES (Phase 1: Data Collection)
+
+✅ NEXT ACTION ITEMS:
+  1. Run full cross-validation on expanded dataset after augmentation
+  2. Collect ~500 waste images for visual feature training
+  3. Implement ensemble voting (text + visual)
+  4. Deploy confidence gate at 85% threshold
+  5. Set up A/B testing with human-in-the-loop for UNCERTAIN cases
+
+🏆 CONCLUSION:
+  ✅ Model is PRODUCTION-READY with excellent generalization!
+
+======================================================================

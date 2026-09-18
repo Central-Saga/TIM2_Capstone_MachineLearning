@@ -1,0 +1,45 @@
+name: KitchenGuard ML CI & Validation Pipeline
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+jobs:
+  ml-quality-and-tests:
+    name: Lint, Unit Test & ML Model Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Python Syntax & Critical Error Linting
+        run: |
+          # Stop build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv,.venv,android
+
+      - name: Run Pytest Test Suite (Unit & Integration)
+        run: |
+          python -m pytest tests/ -v --junitxml=pytest-results.xml
+
+      - name: Run Automated ML Cross-Validation & Noise Robustness Test
+        run: |
+          python validate_model_advanced.py
+
+      - name: Run Comprehensive 2-Skema & Confidence Gate Verification
+        run: |
+          python comprehensive_multi_tests.py

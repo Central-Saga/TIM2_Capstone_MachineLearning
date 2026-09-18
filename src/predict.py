@@ -116,6 +116,7 @@ class KitchenGuardTextPredictor:
         result = {
             "ai": {
                 "task": "waste_text_classification",
+                "class": effective_class,
                 "predicted_class": effective_class,
                 "raw_predicted_class": top_class,
                 "confidence": round(confidence, 4),

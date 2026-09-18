@@ -164,16 +164,6 @@ def generate_waste_quality_dataset(samples_per_class=300):
 if __name__ == "__main__":
     print("Generating skin tone dataset...")
     
-    # Generate separate datasets per category first
-    hand_samples = []
-    face_samples = []
-    
-    # Generate HAND samples
-    for i in range(500):
-        r, g, b, skin_type_list = generate_fair_skin_simple()
-        # Simplified approach - just append basic stats
-    
-    # Better approach with simpler generation
     rows = []
     for category in ["HAND", "FACE"]:
         for j in range(500):
