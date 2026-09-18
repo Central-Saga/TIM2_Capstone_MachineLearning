@@ -40,7 +40,17 @@ print("\n" + "="*70)
 print("STEP 1: Dataset Loading & Basic Analysis")
 print("="*70)
 
-df = pd.read_csv('data/kitchenguard_waste_dataset.csv')
+dataset_path = os.path.join('data', 'kitchenguard_waste_dataset.csv')
+if not os.path.exists(dataset_path):
+    print(f"⚠️ Warning: {dataset_path} not found. Generating evaluation benchmark dataset...")
+    os.makedirs('data', exist_ok=True)
+    from generate_dataset import generate_samples
+    df = generate_samples(target_per_class=180)
+    df.to_csv(dataset_path, index=False, encoding="utf-8")
+    print(f"✓ Generated {len(df)} samples into {dataset_path}")
+else:
+    df = pd.read_csv(dataset_path)
+
 print(f"\n✓ Dataset size: {len(df)} samples")
 print(f"✓ Categories: {df['category'].unique().tolist()}")
 print(f"\n📊 Class Distribution:")
