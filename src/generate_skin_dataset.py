@@ -32,7 +32,7 @@ def generate_skin_pixel():
     
     return np.array([r, g, b], dtype=np.uint8), skin_type
 
-    def generate_synthetic_face_image(width=64, height=64):
+def generate_synthetic_face_image(width=64, height=64):
     """Generate gambar wajah sintetis untuk training"""
     img = np.zeros((height, width, 3), dtype=np.uint8)
     

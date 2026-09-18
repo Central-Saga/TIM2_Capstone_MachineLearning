@@ -149,7 +149,7 @@ if __name__ == "__main__":
     skin_df.to_csv(os.path.join("..", "data", "skin_detection_dataset.csv"), index=False)
     print(f"✓ Saved skin detection dataset: {len(skin_df)} samples")
     print(f"  - Categories: HAND={len(skin_df[skin_df['category']=='HAND'])}, FACE={len(skin_df[skin_df['category']=='FACE'])}")
-    print(f"  - Skin Types: FAIR_1={len(skin_df[skin_df['skin_type']=='FAIR_1'])}, FAIR_2={len(skin_df[skin_df['skin_type']=='FAIR_2'])}, FAIR_3={len(skin_df[skin_df['skin_type=='FAIR_3'])}")
+    print(f"  - Skin Types: FAIR_1={len(skin_df[skin_df['skin_type']=='FAIR_1'])}, FAIR_2={len(skin_df[skin_df['skin_type']=='FAIR_2'])}, FAIR_3={len(skin_df[skin_df['skin_type']=='FAIR_3'])}")
     
     # Generate Waste Quality Dataset
     print("\n[2/2] Generating waste quality dataset...")
