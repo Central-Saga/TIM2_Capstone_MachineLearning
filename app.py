@@ -29,8 +29,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Query, Request, status, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 import joblib
 
@@ -38,7 +37,6 @@ import joblib
 BASE_DIR = Path(__file__).resolve().parent
 SRC_DIR = BASE_DIR / "src"
 MODELS_DIR = BASE_DIR / "models"
-STATIC_DIR = BASE_DIR / "static"
 REPORTS_DIR = BASE_DIR / "reports"
 DATA_DIR = BASE_DIR / "data"
 
@@ -131,8 +129,7 @@ load_models()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Siklus hidup aplikasi saat startup dan shutdown."""
-    logger.info("Memulai layanan KitchenGuard CSM v3.0...")
-    STATIC_DIR.mkdir(exist_ok=True)
+    logger.info("Memulai layanan KitchenGuard CSM v3.0 (Headless API)...")
     REPORTS_DIR.mkdir(exist_ok=True)
     DATA_DIR.mkdir(exist_ok=True)
     
@@ -146,7 +143,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="KitchenGuard CSM — Intelligence API",
     description=(
-        "Layanan Machine Learning terpadu untuk klasifikasi limbah dapur, deteksi visual freshness, "
+        "Layanan Machine Learning Headless REST API terpadu untuk klasifikasi limbah dapur, deteksi visual freshness, "
         "kalkulasi kerugian finansial, dan audit harian operasional F&B.\n\n"
         "**Mitra Industri:** PT Central Saga Mandala  \n"
         "**Program:** Capstone Project ITB STIKOM Bali — Track 2: Automated Quality Control & Waste Prevention"
@@ -165,10 +162,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Mount folder static dan laporan
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-app.mount("/reports", StaticFiles(directory=str(REPORTS_DIR)), name="reports")
 
 # =============================================================================
 # PYDANTIC SCHEMAS / REQUEST & RESPONSE CONTRACTS
@@ -337,23 +330,26 @@ def predict_waste(text: str, threshold: float = 0.85) -> Dict[str, Any]:
 # API ENDPOINTS
 # =============================================================================
 
-@app.get("/", response_class=HTMLResponse, tags=["Web UI"])
-@app.get("/reports", response_class=HTMLResponse, tags=["Web UI"])
-def serve_home():
-    """Menampilkan halaman antarmuka web interaktif KitchenGuard CSM (bebas UnicodeDecodeError di Windows)."""
-    index_path = STATIC_DIR / "index.html"
-    if index_path.exists():
-        return FileResponse(str(index_path))
-    return HTMLResponse(
-        content="""
-        <html>
-            <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #0b0f19; color: #fff;">
-                <h2>KitchenGuard CSM — System Running</h2>
-                <p>Dokumentasi API interaktif: <a style="color: #3b82f6;" href="/docs">/docs</a></p>
-            </body>
-        </html>
-        """
-    )
+@app.get("/", tags=["System"])
+@app.get("/reports", tags=["System"])
+def root():
+    """Endpoint root Headless REST API KitchenGuard CSM (Pure JSON, no UI)."""
+    return {
+        "service": "KitchenGuard CSM — Headless Intelligence API",
+        "status": "online",
+        "mode": "headless_api",
+        "version": metadata.get("model_info", {}).get("version", "3.0.0"),
+        "endpoints": {
+            "health": "/api/health",
+            "info": "/api/info",
+            "predict": "/api/predict",
+            "batch_predict": "/api/predict/batch",
+            "barcode_scan": "/api/barcode/scan",
+            "scale_ocr": "/api/ocr/scan-scale",
+            "daily_summary": "/api/reports/daily-summary",
+            "docs": "/docs"
+        }
+    }
 
 @app.get("/api/health", tags=["System"])
 def healthcheck():
