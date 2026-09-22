@@ -9,6 +9,15 @@ from app import app
 client = TestClient(app)
 
 class TestHealthEndpoint:
+    def test_root_headless_json(self):
+        """Verifies root / endpoint returns JSON with no HTML."""
+        resp = client.get("/")
+        assert resp.status_code == 200
+        assert "application/json" in resp.headers.get("content-type", "")
+        data = resp.json()
+        assert data["mode"] == "headless_api"
+        assert "endpoints" in data
+
     def test_health_check_healthy(self):
         """Verifies /api/health reports healthy and ML model is ready."""
         resp = client.get("/api/health")
