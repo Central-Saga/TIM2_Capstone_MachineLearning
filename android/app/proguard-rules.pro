@@ -1,9 +1,13 @@
-# Proguard rules for KitchenGuard CSM Android App
-# Keeps TFLite, GSON, Retrofit, CameraX and Models
+# Keep DTOs & Gson Serialization
+-keepclassmembers class com.csm.kitchenguard.data.remote.dto.** { *; }
+-keep class com.csm.kitchenguard.data.remote.dto.** { *; }
 
+# Keep Room Database Models
+-keep class androidx.room.** { *; }
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class * { *; }
+
+# Keep TensorFlow Lite & ML Kit
 -keep class org.tensorflow.lite.** { *; }
--keep class com.kitchenguard.csm.model.** { *; }
--keep class com.kitchenguard.csm.utils.** { *; }
--keepattributes Signature
--keepattributes *Annotation*
--dontwarn sun.misc.**
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.tasks.** { *; }

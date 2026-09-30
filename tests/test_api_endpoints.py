@@ -4,7 +4,16 @@ Ensures that all endpoints are functional, models are loaded, and regressions (s
 """
 import pytest
 from fastapi.testclient import TestClient
-from app import app
+import app as app_module
+if hasattr(app_module, "app"):
+    app = app_module.app
+else:
+    import importlib.util
+    import os
+    spec = importlib.util.spec_from_file_location("app_file", os.path.abspath("app.py"))
+    app_file = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(app_file)
+    app = app_file.app
 
 client = TestClient(app)
 

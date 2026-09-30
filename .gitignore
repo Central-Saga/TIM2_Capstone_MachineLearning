@@ -77,3 +77,9 @@ android/local.properties
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Submodules / Separate Git Clones
+TIM_2_ANDROID/
+KitchenGuard-CSM/
+Tim2_Capstone_Website_Admin/
+

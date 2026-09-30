@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Data Extraction Rules for KitchenGuard
+  PRD Section 9 - Authentication Security
+
+  SECURITY POLICY:
+  - Token JWT di EncryptedSharedPreferences (kitchenguard_secure_prefs)
+    DIKECUALIKAN dari cloud backup maupun device transfer.
+  - Data non-sensitive boleh diekstrak.
+
+  Catatan: android:allowBackup="false" di AndroidManifest.xml sudah mematikan
+  backup sepenuhnya. File ini tetap disediakan sebagai defense-in-depth.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Jangan pernah backup token terenkripsi -->
+        <exclude domain="sharedpref" path="kitchenguard_secure_prefs.xml"/>
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- Jangan pernah transfer token terenkripsi -->
+        <exclude domain="sharedpref" path="kitchenguard_secure_prefs.xml"/>
+    </device-transfer>
+</data-extraction-rules>

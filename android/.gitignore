@@ -1,0 +1,12 @@
+*.iml
+.gradle
+/local.properties
+# Issue #24: Kecualikan seluruh direktori .idea/ dari version control.
+# Konfigurasi IDE bersifat lokal dan tidak relevan bagi contributor lain.
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties

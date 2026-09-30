@@ -1,0 +1,26 @@
+{
+  "class_to_index": {
+    "CONTAMINATED": 0,
+    "EXPIRED": 1,
+    "OVERCOOKED": 2,
+    "PREP_WASTE": 3,
+    "SPOILED": 4,
+    "SURPLUS": 5
+  },
+  "index_to_class": {
+    "0": "CONTAMINATED",
+    "1": "EXPIRED",
+    "2": "OVERCOOKED",
+    "3": "PREP_WASTE",
+    "4": "SPOILED",
+    "5": "SURPLUS"
+  },
+  "hygiene_priority": {
+    "CONTAMINATED": "CRITICAL",
+    "SPOILED": "HIGH",
+    "EXPIRED": "HIGH",
+    "OVERCOOKED": "MEDIUM",
+    "PREP_WASTE": "LOW",
+    "SURPLUS": "LOW"
+  }
+}
