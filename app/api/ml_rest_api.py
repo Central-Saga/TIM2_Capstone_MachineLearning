@@ -19,10 +19,10 @@ from datetime import datetime
 # Set up proper path for imports
 import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)  # Go to project root
+project_root = os.path.dirname(os.path.dirname(current_dir))  # Go to project root (C:\CAPSTONE_MACHINE_LEARNING)
 src_dir = os.path.join(project_root, 'src')
 sys.path.insert(0, src_dir)
-os.chdir(project_root)  # Set working directory to project root
+sys.path.insert(0, project_root)
 
 from preprocess import preprocess_text
 from preprocess_version import get_preprocessing_version, validate_metadata
