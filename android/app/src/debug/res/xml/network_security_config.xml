@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration for KitchenGuard (DEBUG ONLY)
+  PRD Section 6.2 - HTTPS Requirement
+
+  DEVELOPMENT POLICY:
+  - HTTPS tetap diwajibkan secara default.
+  - Cleartext (HTTP) HANYA diizinkan untuk server development lokal:
+      10.0.2.2   -> Android Emulator loopback ke localhost host machine
+      localhost  -> loopback perangkat
+      127.0.0.1  -> loopback perangkat
+  - File ini hanya dipakai oleh build type `debug` (di-override dari main).
+
+  DO NOT USE IN PRODUCTION.
+-->
+<network-security-config>
+    <!-- Default: tetap blokir cleartext -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Pengecualian khusus development lokal -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>

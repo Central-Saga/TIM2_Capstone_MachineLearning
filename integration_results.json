@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-09-23T16:38:32.227892",
+  "tests_run": 9,
+  "passed": 1,
+  "failed": 8,
+  "accuracy": 11.11111111111111,
+  "tests": [
+    {
+      "name": "Health Check (ML API)",
+      "passed": true,
+      "details": [
+        "Status: healthy",
+        "Models loaded: True",
+        "Preprocessing version: 2.0.0"
+      ]
+    },
+    {
+      "name": "Health Check (Backend Gateway)",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /health (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 3: SPOILED",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 4: EXPIRED",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 5: CONTAMINATED",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 6: OVERCOOKED",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 7: PREP_WASTE",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Category 8: SURPLUS",
+      "passed": false,
+      "details": [
+        "Error: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    },
+    {
+      "name": "Error Handling (Empty Input)",
+      "passed": false,
+      "details": [
+        "Exception: HTTPConnectionPool(host='localhost', port=3001): Max retries exceeded with url: /api/ml/waste/predict (Caused by NewConnectionError(\"HTTPConnection(host='localhost', port=3001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it\"))"
+      ]
+    }
+  ]
+}

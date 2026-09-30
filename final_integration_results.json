@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-09-23T16:59:25.285386",
+  "web_admin": {
+    "passed": 3,
+    "failed": 0,
+    "details": [
+      {
+        "category": "SPOILED",
+        "predicted": "SPOILED",
+        "confidence": 0.9899,
+        "correct": true,
+        "http_status": 200,
+        "request": {
+          "description": "ayam mulai berlendir dan berbau tidak sedap di chi"
+        },
+        "response": {
+          "label": "SPOILED",
+          "confidence": 0.9899,
+          "model_version": "2.0.0",
+          "preprocessing_version": "2.0.0",
+          "timestamp": "2026-09-23T16:59:25.215975"
+        }
+      },
+      {
+        "category": "EXPIRED",
+        "predicted": "EXPIRED",
+        "confidence": 0.9999,
+        "correct": true,
+        "http_status": 200,
+        "request": {
+          "description": "saus tomat kemasan expired date sudah terlewati mi"
+        },
+        "response": {
+          "label": "EXPIRED",
+          "confidence": 0.9999,
+          "model_version": "2.0.0",
+          "preprocessing_version": "2.0.0",
+          "timestamp": "2026-09-23T16:59:25.225480"
+        }
+      },
+      {
+        "category": "CONTAMINATED",
+        "predicted": "CONTAMINATED",
+        "confidence": 1,
+        "correct": true,
+        "http_status": 200,
+        "request": {
+          "description": "daun selada segar jatuh ke lantai dapur yang kotor"
+        },
+        "response": {
+          "label": "CONTAMINATED",
+          "confidence": 1,
+          "model_version": "2.0.0",
+          "preprocessing_version": "2.0.0",
+          "timestamp": "2026-09-23T16:59:25.232519"
+        }
+      }
+    ]
+  },
+  "android": {
+    "passed": 3,
+    "failed": 0,
+    "details": [
+      {
+        "category": "OVERCOOKED",
+        "simulated_url": "http://10.0.2.2:3001",
+        "actual_used": "http://localhost:3001 (localhost test)",
+        "predicted": "OVERCOOKED",
+        "confidence": 0.999,
+        "correct": true,
+        "http_status": 200
+      },
+      {
+        "category": "PREP_WASTE",
+        "simulated_url": "http://10.0.2.2:3001",
+        "actual_used": "http://localhost:3001 (localhost test)",
+        "predicted": "PREP_WASTE",
+        "confidence": 1,
+        "correct": true,
+        "http_status": 200
+      },
+      {
+        "category": "SURPLUS",
+        "simulated_url": "http://10.0.2.2:3001",
+        "actual_used": "http://localhost:3001 (localhost test)",
+        "predicted": "SURPLUS",
+        "confidence": 0.9999,
+        "correct": true,
+        "http_status": 200
+      }
+    ]
+  },
+  "total_passed": 6,
+  "total_failed": 0,
+  "architecture_verified": true,
+  "files_created": [
+    "src/api/ml-client.ts",
+    "src/components/WasteClassifier.tsx",
+    "MlWasteClassificationApi.kt",
+    "MlWasteClassificationRepository.kt",
+    "ML_INTEGRATION_GUIDE.md"
+  ],
+  "endpoints_tested": [
+    "/api/ml/waste/predict",
+    "/health"
+  ]
+}

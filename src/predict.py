@@ -12,6 +12,7 @@ import joblib
 import numpy as np
 
 from preprocess import preprocess_text
+from preprocess_version import get_preprocessing_version, validate_metadata
 
 class KitchenGuardTextPredictor:
     """
@@ -34,6 +35,7 @@ class KitchenGuardTextPredictor:
             self.metadata_path = os.path.join(target_dir, "model_metadata.json")
         
         self._load_artifacts()
+        self._validate_preprocessing_compatibility()
         
         # Rekomendasi aksi operasional dapur berdasarkan kategori PRD
         self.action_guide = {
@@ -45,6 +47,18 @@ class KitchenGuardTextPredictor:
             "SURPLUS": "Evaluasi porsi berlebih. Alihkan ke program staff meal jika higienis atau catat overproduction write-off."
         }
         
+    def _validate_preprocessing_compatibility(self):
+        """Validate preprocessing version compatibility (prevents train/serve skew)"""
+        if os.path.exists(self.metadata_path):
+            try:
+                with open(self.metadata_path, 'r', encoding='utf-8') as f:
+                    metadata = json.load(f)
+                is_valid, msg = validate_metadata(metadata)
+                if not is_valid:
+                    print(f"⚠️ Warning: {msg}")
+            except Exception as e:
+                print(f"⚠️ Warning: Unable to validate preprocessing: {e}")
+
     def _load_artifacts(self):
         if not os.path.exists(self.model_path):
             raise FileNotFoundError(f"Model file tidak ditemukan di {self.model_path}. Jalankan train.py terlebih dahulu.")

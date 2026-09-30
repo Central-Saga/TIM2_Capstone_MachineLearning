@@ -154,3 +154,87 @@ if __name__ == "__main__":
     sample = "Tomat merah sudah berjamur putih dan kulitnya lembek berair di chiller 1!"
     print(f"Teks Asli      : {sample}")
     print(f"Hasil Praproses: {preprocess_text(sample)}")
+
+# =====================
+# OOV (Out of Vocabulary) Keyword Matching Fallback
+# =====================
+
+def oov_keyword_fallback(text: str) -> dict:
+    """
+    Fallback mechanism untuk teks yang OUT OF VOCABULARY (tidak ada di training data).
+    Menggunakan keyword-based classification sebagai safety net.
+    
+    Returns: {
+        "category": str,  # Predicted waste category
+        "confidence": float,  # Confidence score (0-1)
+        "matched_keywords": list[str],  # Keywords that triggered this prediction
+        "fallback_used": True,
+    }
+    """
+    
+    text_lower = text.lower()
+    
+    # Keyword patterns per category
+    keyword_patterns = {
+        "CONTAMINATED": [
+            "terkontaminasi", "contaminated", "lantai", "hair", "lunas", 
+            "sewage", "pest", "rodent", "tikus", "serangga", "shard", "kaca",
+            "logam", "metal", "chemical", "pembersih", "tangan", "bersentuh",
+            "berkontak", "jatuh", "floor", "bakteri", "virus"
+        ],
+        "SPOILED": [
+            "berjamur", "moldy", "jamur", "busuk", "rotten", "bau", "smell",
+            "lendir", "slimy", "lembek", "mushy", "kebiruan", "kehijauan",
+            "discoloration", "curdled", "sour", "asam", "raneid", "busuk",
+            "off smell", "mould", "fermentasi", "tapai", "basi", "apek", "anyir"
+        ],
+        "EXPIRED": [
+            "expired", "kedaluwarsa", "mhd", "kadaluwarsa", "lewat", "melewati",
+            "expiry", "date expired", "sudah expiry", "telah expired", "expired date",
+            "bebeku", "thawed", "melted", "dicairkan", "frozen", "cair",
+            "melting", "refreeze", "bekuan"
+        ],
+        "OVERCOOKED": [
+            "gosong", "burnt", "hangus", "overcook", "terbakar", "hitam",
+            "charred", "scorched", "kehitaman", "coklat tua", "burning",
+            "overdone", "keras", "kering", "hard", "dry", "pengap"
+        ],
+        "PREP_WASTE": [
+            "trimming", "trim", "peeling", "potongan", "sisa", "prep",
+            "cutting board", "skinning", "boning", "diced", "chopped",
+            "memotong", "mengupas", "menghilangkan", "kulit", "tulang", "urat"
+        ],
+        "SURPLUS": [
+            "surplus", "excess", "leftover", "unserved", "tidak terjual",
+            "lebih", "sisa pelayanan", "remaining", "extra", "unplanned",
+            "tidak tersentuh", "dimakan customer", "plate scrapings"
+        ]
+    }
+    
+    # Score each category based on keyword matches
+    scores = {}
+    matched_keywords = {}
+    
+    for category, keywords in keyword_patterns.items():
+        matches = sum(1 for kw in keywords if kw in text_lower)
+        scores[category] = matches
+        matched_keywords[category] = [kw for kw in keywords if kw in text_lower]
+    
+    # Find best match
+    best_category = max(scores, key=scores.get)
+    best_score = scores[best_category]
+    
+    # Calculate confidence based on number of matched keywords
+    confidence = min(best_score / max(len(keyword_patterns[best_category]) * 0.3, 1), 0.95)
+    
+    # Minimum confidence floor
+    if best_score > 0 and confidence < 0.3:
+        confidence = 0.3 + (best_score * 0.1)
+    
+    return {
+        "category": best_category,
+        "confidence": round(confidence, 3),
+        "matched_keywords": matched_keywords[best_category],
+        "fallback_used": True,
+        "score_breakdown": scores
+    }

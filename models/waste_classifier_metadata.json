@@ -1,7 +1,9 @@
 {
+  "preprocessing_version": "2.0.0",
   "model_info": {
     "name": "KitchenGuard Waste Classifier v2",
     "version": "2.0.0",
+    "preprocessing_version": "2.0.0",
     "created_at": "2026-09-18T21:14:42.341493",
     "type": "voting_ensemble",
     "algorithms": [

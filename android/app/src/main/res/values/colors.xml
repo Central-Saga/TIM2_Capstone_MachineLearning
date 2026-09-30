@@ -1,42 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema Dominan Putih & Oranye Modern (Clean Material Design) -->
-    <color name="white">#FFFFFF</color>
-    <color name="background_primary">#FAFAFA</color>
-    <color name="background_secondary">#F5F5F5</color>
-    <color name="card_background">#FFFFFF</color>
-    <color name="border_color">#E5E5E5</color>
-    <color name="border_light">#F0F0F0</color>
-    
-    <!-- Warna Orange Utama (Material Color System) -->
-    <color name="orange_primary">#FF6B00</color>
-    <color name="orange_dark">#E65C00</color>
-    <color name="orange_light">#FFF3E0</color>
-    <color name="orange_tint">#FFE5CC</color>
-    <color name="orange_500">#FF6B00</color>
-    <color name="orange_400">#FF7D1A</color>
-    <color name="orange_300">#FF9533</color>
-    <color name="orange_100">#FFE0B3</color>
-    <color name="orange_50">#FFF5E6</color>
-    
-    <!-- Warna Pendukung -->
-    <color name="success_green">#10B981</color>
-    <color name="success_green_bg">#DCFCE7</color>
-    <color name="warning_yellow">#F59E0B</color>
-    <color name="warning_yellow_bg">#FEF3C7</color>
-    <color name="danger_red">#EF4444</color>
-    <color name="danger_red_bg">#FEE2E2</color>
-    <color name="info_blue">#3B82F6</color>
-    <color name="info_blue_bg">#DBEAFE</color>
-    
-    <!-- Teks dengan Kontras Optimal -->
-    <color name="text_primary">#1F2937</color>
-    <color name="text_secondary">#6B7280</color>
-    <color name="text_muted">#9CA3AF</color>
-    <color name="text_hint">#D1D5DB</color>
-    <color name="text_on_primary">#FFFFFF</color>
-    
-    <!-- Shadow & Elevation Colors -->
-    <color name="shadow_light">#80000000</color>
-    <color name="shadow_medium">#40000000</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

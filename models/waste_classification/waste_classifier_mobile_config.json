@@ -1,0 +1,34 @@
+{
+  "export_version": "1.0.0",
+  "export_timestamp": "2026-09-30T11:06:34.893688",
+  "model_type": "hybrid_ml_prediction",
+  "preprocessing": {
+    "type": "tfidf_with_sastrawi_stemmer",
+    "language": "indonesian",
+    "vocabulary_size": 1205,
+    "stopwords_count": 50
+  },
+  "prediction": {
+    "method": "ensemble_voting",
+    "components": [
+      "naive_bayes",
+      "svm",
+      "random_forest"
+    ],
+    "num_classes": 6,
+    "classes": [
+      "CONTAMINATED",
+      "EXPIRED",
+      "OVERCOOKED",
+      "PREP_WASTE",
+      "SPOILED",
+      "SURPLUS"
+    ],
+    "confidence_threshold": 0.85
+  },
+  "compatibility": {
+    "requires_android_api": "21+",
+    "min_memory_mb": 50,
+    "inference_time_ms": "~5-10ms"
+  }
+}

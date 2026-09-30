@@ -1,9 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration for KitchenGuard (RELEASE / MAIN)
+  PRD Section 6.2 - HTTPS Requirement
+
+  SECURITY POLICY:
+  1. Production: ONLY HTTPS allowed, no cleartext traffic.
+  2. All network traffic must use TLS 1.2+.
+
+  Note: A relaxed debug-only override lives in src/debug/res/xml/ to allow
+  HTTP to the local dev server (10.0.2.2 / localhost). This main config stays
+  strict so release builds never permit cleartext.
+
+  CERTIFICATE PINNING: To be implemented in Phase 09 for production.
+-->
 <network-security-config>
-    <!-- Allow cleartext HTTP only for local development / testing environments -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">10.0.2.2</domain>
-        <domain includeSubdomains="true">localhost</domain>
-        <domain includeSubdomains="true">127.0.0.1</domain>
+    <!-- Default policy: block ALL cleartext traffic, require HTTPS -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Staging environment: strict HTTPS-only -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">staging-api.kitchenguard.com</domain>
+        <domain includeSubdomains="true">api-staging.internal</domain>
+    </domain-config>
+
+    <!-- Production environment: strict HTTPS-only -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.kitchenguard.com</domain>
+        <domain includeSubdomains="true">kitchenguard-backend.internal</domain>
+        <!-- Certificate pinning (<pin-set>) to be added in Phase 09 -->
     </domain-config>
 </network-security-config>

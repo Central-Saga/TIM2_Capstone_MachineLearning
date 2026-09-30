@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backup Rules for KitchenGuard
+  PRD Section 9 - Authentication Security
+
+  SECURITY POLICY:
+  - Token JWT tersimpan di EncryptedSharedPreferences (kitchenguard_secure_prefs)
+    dan DIKECUALIKAN dari backup cloud agar tidak pernah keluar dari device.
+  - Data non-sensitive (profil user, data shift, database lokal) boleh di-backup.
+
+  Catatan: android:allowBackup="false" di AndroidManifest.xml sudah mematikan
+  backup sepenuhnya. File ini tetap disediakan sebagai defense-in-depth jika
+  allowBackup diaktifkan kembali di masa depan.
+-->
+<full-backup-content>
+    <!-- Jangan pernah backup token terenkripsi -->
+    <exclude domain="sharedpref" path="kitchenguard_secure_prefs.xml"/>
+</full-backup-content>

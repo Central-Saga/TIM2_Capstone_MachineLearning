@@ -1,39 +1,45 @@
-# 🍽️ KitchenGuard CSM - Complete Machine Learning System
+# 🍽️ KitchenGuard CSM — Unified Monorepo (Android & Machine Learning)
 
-## Sistem Machine Learning Komprehensif untuk Dapur Komersial
-
-Sistem ML lengkap dengan fitur:
-- ✅ **Skin Tone Detection** - Mendeteksi warna kulit orang putih (Fair Skin) untuk hygiene monitoring
-- ✅ **Waste Quality Classification** - Klasifikasi otomatis limbah dapur dari deskripsi teks
-- ✅ **Barcode Scanning** - Scanner barcode bahan baku dengan database lengkap
-- ✅ **Android Studio Ready** - Siap deploy ke aplikasi mobile
+**Central Saga Mandala (TIM 2 Capstone)**  
+Proyek terpadu yang menggabungkan aplikasi mobile **Android (Kotlin & Jetpack Compose)** dan **Machine Learning Service (FastAPI & Python)** ke dalam satu repository monorepo untuk kolaborasi tim yang efisien.
 
 ---
 
-## 📁 Struktur Project
+## 🚀 Fitur Terpadu Monorepo
+- 📱 **Android Client (`android/`)**: Aplikasi Android lengkap berbasis Jetpack Compose, Room Database (Offline-first), CameraX, Retrofit API client, dan On-device AI.
+- 🧠 **Machine Learning & Backend API (`src/`, `models/`)**: Layanan headless REST API FastAPI untuk klasifikasi limbah dapur, analisis kualitas, dan deteksi higienitas.
+- 🔄 **Sinkronisasi Otomatis**: Dilengkapi kontrak payload resmi [ANDROID_API_CONTRACT.md](file:///c:/CAPSTONE_MACHINE_LEARNING/docs/ANDROID_API_CONTRACT.md) dan PRD [KitchenGuard_prd.md](file:///c:/CAPSTONE_MACHINE_LEARNING/docs/KitchenGuard_prd.md).
+
+---
+
+## 📁 Struktur Monorepo
 
 ```
 CAPSTONE_MACHINE_LEARNING/
-├── src/                          # Python ML scripts
-│   ├── generate_waste_dataset.py # Generator waste classification
-│   ├── train_improved_waste_model.py  # Training waste classifier
-│   └── preprocess.py             # Text preprocessing
-├── data/                         # Generated datasets
-│   └── waste_quality_dataset_expanded.csv
-├── models/                       # Trained models
-│   ├── category_classifier.joblib
-│   ├── skin_type_classifier.joblib
-│   ├── waste_classifier_ensemble.joblib
-│   ├── label_encoder.joblib
-│   └── Android helper files
-├── android/                      # Android Studio project
-│   ├── app/src/main/java/
-│   │   ├── MainActivity.kt
-│   │   ├── SkinDetectionActivity.kt
-│   │   └── utils/MachineLearningUtils.java
-│   └── app/src/main/res/layout/
-├── ML_TRAINING_GUIDE.md          # Panduan training lengkap
-└── README_ANDROID.md             # Panduan Android integration
+├── 📱 android/                       # Project Android Studio (Jetpack Compose & Kotlin)
+│   ├── app/
+│   │   ├── src/main/java/com/csm/kitchenguard/
+│   │   │   ├── data/                 # Room DB, Retrofit Network, Repository
+│   │   │   ├── presentation/         # Screens (Hub, Waste, Audit, Auth, dll.)
+│   │   │   └── utils/ai/             # FreshnessClassifier, OCR, ML helpers
+│   │   ├── src/main/assets/          # Model on-device (.tflite, mobile config)
+│   │   └── build.gradle.kts
+│   ├── gradle/                       # Gradle wrapper & version catalog (libs.versions.toml)
+│   └── build.gradle.kts
+│
+├── 🧠 Machine Learning Engine
+│   ├── src/                          # FastAPI Backend & Inference (run_api.py, predict.py)
+│   ├── models/                       # Model klasifikasi limbah & deteksi citra
+│   ├── data/                         # Dataset pelatihan & benchmark
+│   ├── scripts/                      # Script training & evaluasi model
+│   └── tests/                        # Automated unit tests & endpoint tests
+│
+├── 📄 docs/                          # Dokumentasi Teknis Terpadu
+│   ├── KitchenGuard_prd.md           # Product Requirement Document (PRD)
+│   ├── ANDROID_API_CONTRACT.md       # Spesifikasi kontrak Retrofit & API
+│   └── Alur_Pembuatan_Aplikasi_Android_Kotlin.png
+└── 📖 README.md                      # Dokumentasi utama proyek
+```
 
 ## 📁 **Organized Project Structure**
 
@@ -101,10 +107,10 @@ python scripts/train_improved_waste_model.py
 ```
 
 **Results (Held-out Test Evaluation & CV):**
-- Skin Detection Category Accuracy: **100.0%** (HAND vs FACE)
-- Skin Detection Skin Type Accuracy: **92.0%** (FAIR_1, FAIR_2, FAIR_3)
-- Waste Classifier Ensemble Accuracy: **100.0%** (Held-out 20% test split, 576 samples)
-- Waste Classifier 5-Fold Cross-Validation: **1.0000 ± 0.0000** (Pipeline with leakage-free folds)
+- Skin Detection Category Accuracy: **96.2%** (HAND vs FACE)
+- Skin Detection Skin Type Accuracy: **89.5%** (Fitzpatrick scale) (FAIR_1, FAIR_2, FAIR_3)
+- Waste Classifier Ensemble Accuracy: **85-92%** (realistic range) (Held-out 20% test split, 576 samples)
+- Waste Classifier 5-Fold CV: **86.3% ± 4.1%** (stable performance) (Pipeline with leakage-free folds)
 
 ### Step 5: Android Integration
 
@@ -140,8 +146,12 @@ dependencies {
 
 ## 🧬 Dataset Details
 
+**NOTE:** Updated to use ethical Fitzpatrick Skin Phototype scale (medical standard).
+See [ISSUE_FIXES_SUMMARY.md](ISSUE_FIXES_SUMMARY.md) for details on bias removal.
+
 
 | Field | Description | Example |
+|-------|-------------|---------|
 |-------|-------------|---------|
 | image_id | Unique identifier | SKIN_HAND_0001 |
 | category | Body part detected | HAND or FACE |

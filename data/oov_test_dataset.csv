@@ -1,0 +1,87 @@
+sample_id,input_text,category_type,expected_category,difficulty,has_typo,has_mixed_language,word_count,character_count
+OOV_0001,Ayam goreng basi banget sih,RARE_WASTE,UNKNOWN,MEDIUM,0,0,5,27
+OOV_0002,Daging sapi udah bau amonia bro,RARE_WASTE,SPOILED,MEDIUM,0,1,6,31
+OOV_0003,Susu UHT ketumpah di lantai kitchen,RARE_WASTE,CONTAMINATED,MEDIUM,0,0,6,35
+OOV_0004,Roti moldy karena kelembaban tinggi,RARE_WASTE,SPOILED,MEDIUM,0,0,5,35
+OOV_0005,Telur ceplok overcook sampai hangus,RARE_WASTE,OVERCOOKED,MEDIUM,0,0,5,35
+OOV_0006,Fish fillet terkontaminasi heavy metals warning,RARE_WASTE,CONTAMINATED,MEDIUM,0,0,6,47
+OOV_0007,Vegetable salad dengan insect larvae detected,RARE_WASTE,UNKNOWN,MEDIUM,0,0,6,45
+OOV_0008,Rice porridge expired date sudah lewat MHD+,RARE_WASTE,EXPIRED,MEDIUM,0,0,7,43
+OOV_0009,Cheese block with penicillium fungus growth,RARE_WASTE,UNKNOWN,MEDIUM,0,0,6,43
+OOV_0010,Seafood shrimp sudah discoloration hijau kebiruan,RARE_WASTE,SPOILED,MEDIUM,0,0,6,49
+OOV_0011,Nasi goreng telat disajikan + kontainer bocor + tercemar debu,RARE_WASTE,UNKNOWN,MEDIUM,0,0,10,61
+OOV_0012,Sup ayam dingin terlalu lama + smell off + visual contamination,RARE_WASTE,SPOILED,MEDIUM,0,0,11,63
+OOV_0013,Salad buah dipotong hari Senin + sekarang Jumat + bruang asam,RARE_WASTE,UNKNOWN,MEDIUM,0,0,11,61
+OOV_0014,Ice cream melted refreeze again + crystallized texture + taste off,RARE_WASTE,SPOILED,MEDIUM,0,0,11,66
+OOV_0015,Bread rolls stuck dalam freezer > 3 bulan + freezer burn parah,RARE_WASTE,UNKNOWN,MEDIUM,0,0,12,62
+OOV_0016,Minyak goreng bekas digunain 5x lagi + color dark + smoke point turun,RARE_WASTE,UNKNOWN,MEDIUM,0,0,13,69
+OOV_0017,Tahu tempe kadaluarsa dijadikan snack tradisional,RARE_WASTE,UNKNOWN,MEDIUM,0,0,6,49
+OOV_0018,Kulit ayam burnt charcoal black karena gas flame inconsistency,RARE_WASTE,OVERCOOKED,MEDIUM,0,0,9,62
+OOV_0019,Tomat ceri shriveled completely dehydration extreme,RARE_WASTE,UNKNOWN,MEDIUM,0,0,6,51
+OOV_0020,Gulai kambing excess coconut milk spoiled curdled texture,RARE_WASTE,SPOILED,MEDIUM,0,0,8,57
+OOV_0021,ayam garng rebus bju,MISSPELLED,UNKNOWN,HIGH,1,0,4,20
+OOV_0022,daging sofi kedaluwrs,MISSPELLED,UNKNOWN,HIGH,1,0,3,21
+OOV_0023,susu uht expirred tanggal,MISSPELLED,UNKNOWN,HIGH,1,0,4,25
+OOV_0024,roti jamur mndiri di dlm kls,MISSPELLED,SPOILED,HIGH,1,0,6,28
+OOV_0025,telur busuk baunya sgt menyengat,MISSPELLED,SPOILED,HIGH,1,0,5,32
+OOV_0026,ikan asin hnggs krna kompor,MISSPELLED,UNKNOWN,HIGH,1,0,5,27
+OOV_0027,sayuran layu kdaluwarsa blm dicuci,MISSPELLED,UNKNOWN,HIGH,1,0,5,34
+OOV_0028,mie instant lembab sdh 2 minggu,MISSPELLED,UNKNOWN,HIGH,1,0,6,31
+OOV_0029,biskuit soft bukan crunchy lg,MISSPELLED,UNKNOWN,HIGH,1,0,5,29
+OOV_0030,minyak jelantah dipakai lagi deh,MISSPELLED,UNKNOWN,HIGH,1,0,5,32
+OOV_0031,kmdaluwrsa,MISSPELLED,UNKNOWN,HIGH,1,0,1,10
+OOV_0032,bdaj cpruh,MISSPELLED,UNKNOWN,HIGH,1,0,2,10
+OOV_0033,baui busuk skli,MISSPELLED,SPOILED,HIGH,1,0,3,15
+OOV_0034,trkontaminasi,MISSPELLED,UNKNOWN,HIGH,1,0,1,13
+OOV_0035,expired dtanggal thn 2024,MISSPELLED,EXPIRED,HIGH,1,0,4,25
+OOV_0036,Batch WG-0915-A Daging Sapi Tenderloin 2.3kg Expired 22 Sep 2026,COMPOUND_ENTITIES,EXPIRED,MEDIUM,0,0,10,64
+OOV_0037,Barcode 8991234567890 Apel Fuji Fresh Grade A Imported USA,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,9,58
+OOV_0038,Container ABC123 Susu Ultra High Temp 1Liter Cold Chain Broken,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,10,62
+OOV_0039,Tray XYZ789 Daging Ayam Fillet Frozen Thawed Above Safety Limit,COMPOUND_ENTITIES,EXPIRED,MEDIUM,0,0,10,63
+OOV_0040,Pallet LMN456 Sayuran Organik Mix Lettuce Spinach Carrots Wilting,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,9,65
+OOV_0041,Zone B Chiller Unit 2 Temperature Alarm 8°C for 4 hours Meat products affected,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,14,78
+OOV_0042,Freezer Section 3 Defrost cycle failure Ice cream blocks partially melted,COMPOUND_ENTITIES,EXPIRED,MEDIUM,0,0,11,73
+OOV_0043,Dry Storage Room 5 Humidity spike Cardboard boxes water damaged grains sprouting,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,12,80
+OOV_0044,Mise en place chicken breast diced raw cross-contamination contact cutting board,COMPOUND_ENTITIES,PREP_WASTE,MEDIUM,0,0,11,80
+OOV_0045,Sauce demi-glace reduced too long viscosity too thick burned bottom pan,COMPOUND_ENTITIES,OVERCOOKED,MEDIUM,0,0,11,71
+OOV_0046,Vegetable stock simmered overnight bacterial growth risk identified,COMPOUND_ENTITIES,UNKNOWN,MEDIUM,0,0,8,67
+OOV_0047,Ini dagingnya kayak sudah mati lama sekali baunya,CREATIVE_DESC,SPOILED,MEDIUM,0,0,8,49
+OOV_0048,Sayurnya kelihatan seperti udah nggak fresh banget deh,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,8,54
+OOV_0049,Adonan kue nya berjamur semua lohh,CREATIVE_DESC,SPOILED,MEDIUM,0,1,6,34
+OOV_0050,Minyak wangi makanan malah minyak bekas pakai lagi,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,8,50
+OOV_0051,Bahan bakunya udah pada leleh beku dan cair terus,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,9,49
+OOV_0052,Kuahnya rasanya aneh campur aduk weird flavor,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,7,45
+OOV_0053,Texturenya lengket-lengket kayak belum dicuci bersih,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,6,52
+OOV_0054,Warnanya hijau-hijau kayak ada lumut gitu,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,6,41
+OOV_0055,Baunya kaya ammonia kimia laboratorium,CREATIVE_DESC,SPOILED,MEDIUM,0,0,5,38
+OOV_0056,Kelihatan ada serangga kecil terbang-terbang di situ,CREATIVE_DESC,UNKNOWN,MEDIUM,0,0,7,52
+OOV_0057,Hmm ini kok bau ya...,AMBIGUOUS,SPOILED,HIGH,0,0,5,21
+OOV_0058,Kayaknya udah nggak enak deh,AMBIGUOUS,UNKNOWN,HIGH,0,0,5,28
+OOV_0059,Entahlah terlihat aneh,AMBIGUOUS,UNKNOWN,HIGH,0,0,3,22
+OOV_0060,Mungkin masih aman tapi ragu-ragu,AMBIGUOUS,UNKNOWN,HIGH,0,0,5,33
+OOV_0061,Hmm suspicious smell detected,AMBIGUOUS,SPOILED,HIGH,0,0,4,29
+OOV_0062,Visual inspection shows concerns,AMBIGUOUS,UNKNOWN,HIGH,0,0,4,32
+OOV_0063,Texture感觉 weird (mixed English-Chinese),AMBIGUOUS,UNKNOWN,HIGH,0,1,4,39
+OOV_0064,Seems expired but no visible signs,AMBIGUOUS,EXPIRED,HIGH,0,0,6,34
+OOV_0065,Could be contaminated maybe,AMBIGUOUS,CONTAMINATED,HIGH,0,0,4,27
+OOV_0066,Questionable freshness status,AMBIGUOUS,UNKNOWN,HIGH,0,0,3,29
+OOV_0067,Prime rib roast marbling grade USDA Select grain-fed corn-finished,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,9,66
+OOV_0068,Whole aquaculture salmon Atlantic farmed antibiotic-free wild-caught alternative,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,8,80
+OOV_0069,Organic heritage breed pork loin heritage genetics heritage pork heritage label,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,11,79
+OOV_0070,Shellfish crustacean mollusk allergen separation protocol mandatory labeling,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,8,76
+OOV_0071,Fermented kimchi lactobacillus culture probiotic-rich gut-health functional food,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,8,80
+OOV_0072,Aged dry-aged beef 28-day enzymatic tenderization umami enhancement technique,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,9,77
+OOV_0073,Plant-based meat alternative mycoprotein fungal fermentation protein isolates,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,8,77
+OOV_0074,Cold-smoked salmon salmonella listeria pathogen control HACCP verified,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,8,70
+OOV_0075,Vacuum-sealed sous-vide pasteurization temperature-time critical control point,DOMAIN_JARGON,UNKNOWN,MEDIUM,0,0,7,78
+OOV_0076,GMO-free non-GMO project verified ingredient sourcing transparency traceability,DOMAIN_JARGON,SPOILED,MEDIUM,0,0,8,79
+OOV_0077,Staff tidak pakai sarung tangan saat handling raw chicken cross-contamination risk,COMPLAINT_PATTERNS,UNKNOWN,MEDIUM,0,0,11,82
+OOV_0078,Chef meninggalkan daging di ambient temperature > 2 hours time-temp abuse violation,COMPLAINT_PATTERNS,UNKNOWN,MEDIUM,0,0,12,83
+OOV_0079,Delivery vehicle refrigerator broken during transport cold chain breach suspected,COMPLAINT_PATTERNS,UNKNOWN,MEDIUM,0,1,10,81
+OOV_0080,Supplier substituted ingredients without notice allergen cross-contact potential,COMPLAINT_PATTERNS,UNKNOWN,MEDIUM,0,0,8,80
+OOV_0081,Kitchen sink backs-up sewage contamination food surface exposure immediate action,COMPLAINT_PATTERNS,CONTAMINATED,MEDIUM,0,0,10,81
+OOV_0082,Pest infestation rodents gnawed packaging rodent droppings visible contamination,COMPLAINT_PATTERNS,CONTAMINATED,MEDIUM,0,0,9,80
+OOV_0083,Chemical cleaning spray sprayed directly on food product chemical hazard critical,COMPLAINT_PATTERNS,UNKNOWN,MEDIUM,0,0,11,81
+OOV_0084,Glass shard found in salad glassware breakage foreign object physical hazard,COMPLAINT_PATTERNS,CONTAMINATED,MEDIUM,0,0,11,76
+OOV_0085,Metal shavings from equipment deterioration metal fragment detection required,COMPLAINT_PATTERNS,CONTAMINATED,MEDIUM,0,0,9,77
+OOV_0086,Hair contamination customer complaint hair strands in soup biogenic hazard,COMPLAINT_PATTERNS,CONTAMINATED,MEDIUM,0,0,10,74
