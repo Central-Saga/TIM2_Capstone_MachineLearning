@@ -25,9 +25,7 @@ def test_prediction(description, expected_category):
         
         correct = data["label"].upper() == expected_category.upper()
         
-        print(f"{'✅' if correct else '⚠️'} Category: {expected_category}")
-        print(f"   Input: "{description[:60]}..."")
-        print(f"   Label: {data['label']}")
+        print(f"   Input: \"{description[:60]}...\"")
         print(f"   Confidence: {data['confidence']:.4f}")
         print(f"   Time: {elapsed:.2f}ms")
         

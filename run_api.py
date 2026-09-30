@@ -17,8 +17,6 @@ print("="*60)
 
 import uvicorn
 from app.api.ml_rest_api import app
-
-uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
-
 if __name__ == "__main__":
-    run()
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+
