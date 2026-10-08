@@ -56,7 +56,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
         // BASE_URL configured per build type in buildTypes section
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"") // Debug - localhost emulator
+        buildConfigField("String", "BASE_URL", "\"http://127.0.0.1:8080/\"") // Debug - localhost via adb reverse
     }
 
     buildTypes {
@@ -65,8 +65,8 @@ android {
             versionNameSuffix = "-debug"
             isDebuggable = true
             
-            // HTTP for local development server (localhost/emulator)
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
+            // HTTP for local development server (localhost via adb reverse)
+            buildConfigField("String", "BASE_URL", "\"http://127.0.0.1:8080/\"")
             
             // Network security config allows cleartext for localhost only
         }

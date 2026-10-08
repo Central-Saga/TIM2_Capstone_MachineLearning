@@ -22,8 +22,13 @@ enum class UserRole(val value: String) {
     UNKNOWN("UNKNOWN");
 
     companion object {
-        fun fromValue(value: String): UserRole =
-            entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: UNKNOWN
+        fun fromValue(value: String): UserRole = when (value.trim().uppercase()) {
+            "CHEF" -> HEAD_CHEF
+            "HEAD_CHEF", "HEAD CHEF" -> HEAD_CHEF
+            "STAFF" -> STAFF
+            "SUPERVISOR" -> SUPERVISOR
+            else -> entries.firstOrNull { it.value.equals(value.trim(), ignoreCase = true) } ?: UNKNOWN
+        }
 
         /**
          * Mengembalikan true bila role ini memiliki hak minimum STAFF.

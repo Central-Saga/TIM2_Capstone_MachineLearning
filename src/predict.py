@@ -4,6 +4,7 @@ Langkah 10: Implementasi & Prediksi Teks Baru
 Model digunakan pada aplikasi atau sistem (CLI & REST API / Backend Integration).
 """
 
+import sys
 import os
 import time
 import json
@@ -11,8 +12,22 @@ import argparse
 import joblib
 import numpy as np
 
-from preprocess import preprocess_text
-from preprocess_version import get_preprocessing_version, validate_metadata
+# Ensure UTF-8 stdout/stderr on Windows to avoid UnicodeEncodeError
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+try:
+    from src.preprocess import preprocess_text
+    from src.preprocess_version import get_preprocessing_version, validate_metadata
+except ImportError:
+    from preprocess import preprocess_text
+    from preprocess_version import get_preprocessing_version, validate_metadata
 
 class KitchenGuardTextPredictor:
     """
@@ -198,6 +213,11 @@ def main():
             print(f"Input : '{text}'")
             print(f"Kelas : {res['ai']['predicted_class']} (Confidence: {res['ai']['confidence']*100:.1f}%)")
             print(f"SOP   : {res['action_recommendation']}")
+
+# Alias for backward compatibility
+KitchenGuardPredictor = KitchenGuardTextPredictor
+
+__all__ = ["KitchenGuardTextPredictor", "KitchenGuardPredictor", "main"]
 
 if __name__ == "__main__":
     main()

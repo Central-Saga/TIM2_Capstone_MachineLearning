@@ -28,19 +28,31 @@ import com.csm.kitchenguard.presentation.theme.StatusWarning
 import com.csm.kitchenguard.utils.ocr.OcrScaleReading
 import java.util.concurrent.Executors
 
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+
 @Composable
 fun CameraScaleScannerDialog(
     onDismiss: () -> Unit,
     onWeightConfirmed: (reading: OcrScaleReading) -> Unit
 ) {
-    // Wajibkan izin CAMERA sebelum kamera dibuka (Issue #18).
-    // Bila izin belum ada, gate menampilkan pesan/rationale dan konten kamera
-    // TIDAK dirender — sehingga startCamera tidak pernah dipanggil tanpa izin.
-    CameraPermissionGate(onDismiss = onDismiss) {
-        CameraScannerContent(
-            onDismiss = onDismiss,
-            onWeightConfirmed = onWeightConfirmed
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
         )
+    ) {
+        // Wajibkan izin CAMERA sebelum kamera dibuka (Issue #18).
+        // Bila izin belum ada, gate menampilkan pesan/rationale dan konten kamera
+        // TIDAK dirender — sehingga startCamera tidak pernah dipanggil tanpa izin.
+        CameraPermissionGate(onDismiss = onDismiss) {
+            CameraScannerContent(
+                onDismiss = onDismiss,
+                onWeightConfirmed = onWeightConfirmed
+            )
+        }
     }
 }
 

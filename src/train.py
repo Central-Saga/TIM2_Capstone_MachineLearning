@@ -30,7 +30,10 @@ from sklearn.metrics import (
     classification_report, confusion_matrix
 )
 
-from preprocess import clean_and_preprocess_dataframe
+try:
+    from src.preprocess import clean_and_preprocess_dataframe
+except ImportError:
+    from preprocess import clean_and_preprocess_dataframe
 
 # Konfigurasi style matplotlib
 sns.set_theme(style="whitegrid")

@@ -8,21 +8,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Waste Classification Results
- */
-public class WasteClassificationResult {
-    public String category;           // SPOILED, EXPIRED, etc.
-    public double confidence;         // 0.0 to 1.0
-    public boolean isApproved;        // Above confidence threshold?
-    public String actionRecommendation; // Action guidance text
-}
-
-/**
  * Mobile Waste Classifier Helper
  * Implements simplified prediction logic compatible with mobile environment
  * Uses rule-based extraction matching TF-IDF key features
  */
 public class WasteClassifierMobileHelper {
+
+    /**
+     * Waste Classification Results
+     */
+    public static class WasteClassificationResult {
+        public String category;           // SPOILED, EXPIRED, etc.
+        public double confidence;         // 0.0 to 1.0
+        public boolean isApproved;        // Above confidence threshold?
+        public String actionRecommendation; // Action guidance text
+
+        public WasteClassificationResult() {}
+
+        public WasteClassificationResult(String category, double confidence, boolean isApproved, String actionRecommendation) {
+            this.category = category;
+            this.confidence = confidence;
+            this.isApproved = isApproved;
+            this.actionRecommendation = actionRecommendation;
+        }
+    }
     
     private static final double CONFIDENCE_THRESHOLD = 0.85;
     
@@ -96,12 +105,12 @@ public class WasteClassifierMobileHelper {
         // Get action recommendation
         String action = getActionRecommendation(bestCategory);
         
-        return new WasteClassificationResult() {
-            this.category = bestCategory != null ? bestCategory : "UNCERTAIN";
-            this.confidence = confidence;
-            this.isApproved = isApproved;
-            this.actionRecommendation = action;
-        };
+        return new WasteClassificationResult(
+            bestCategory != null ? bestCategory : "UNCERTAIN",
+            confidence,
+            isApproved,
+            action
+        );
     }
     
     private String getActionRecommendation(String category) {

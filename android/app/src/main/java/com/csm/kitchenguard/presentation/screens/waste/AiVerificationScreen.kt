@@ -1,7 +1,13 @@
 package com.csm.kitchenguard.presentation.screens.waste
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview as CameraPreview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,27 +21,35 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CropFree
-import /* androidx.compose.material.icons.filled.FlashOn */ androidx.compose.material.icons.filled.FlashlightOn
+import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import com.csm.kitchenguard.R
 import com.csm.kitchenguard.data.local.entity.enums.FreshnessClass
+import com.csm.kitchenguard.presentation.components.camera.CameraPermissionGate
 import com.csm.kitchenguard.presentation.theme.*
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,20 +69,19 @@ private val InfoRowBg = Color(0xFFFFFFFF)
 @Composable
 fun AiVerificationScreen(
     onNavigateBack: () -> Unit,
-    onSubmitWriteOff: () -> Unit,
+    onSubmitWriteOff: (chosenClass: String, confidence: Double) -> Unit,
     viewModel: AiVerificationViewModel,
-    /**
-     * Dipanggil saat staff menekan "Scan Ulang / Analisis".
-     * Pemanggil bertanggung jawab menyediakan Bitmap dari kamera/evidence,
-     * lalu memanggil [AiVerificationViewModel.classify].
-     *
-     * Bila null, tombol analisis memakai gambar placeholder abu-abu agar
-     * pipeline inferensi tetap dapat diuji pada perangkat tanpa kamera.
-     */
+    ingredientName: String? = null,
+    ingredientCategory: String? = null,
+    quantityDisplay: String? = null,
     onRequestCapture: (() -> Unit)? = null
 ) {
     // Observasi state AI yang berasal dari inferensi TFLite (bukan hardcoded).
     val uiState by viewModel.uiState.collectAsState()
+    var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var selectedClass by remember(uiState.predictedClass) {
+        mutableStateOf(uiState.predictedClass)
+    }
 
     Column(
         modifier = Modifier
@@ -86,27 +99,49 @@ fun AiVerificationScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 24.dp)
         ) {
-            // ── 2. Card Frame Kamera (Live Viewfinder) ────────────────────────
-            CameraFrameCard(uiState = uiState)
+            // ── 2. Card Frame Kamera (Live CameraX Viewfinder) ─────────────────
+            CameraFrameCard(
+                uiState = uiState,
+                capturedBitmap = capturedBitmap,
+                onCapture = { bitmap ->
+                    capturedBitmap = bitmap
+                    viewModel.classify(bitmap)
+                },
+                onRetake = {
+                    capturedBitmap = null
+                }
+            )
 
             // ── 3. Card Hasil Analisis AI ─────────────────────────────────────
-            AiAnalysisResultCard(uiState = uiState)
+            AiAnalysisResultCard(
+                uiState = uiState,
+                selectedClass = selectedClass,
+                onSelectClass = { selectedClass = it }
+            )
 
             // ── 4. Card Identifikasi Bahan & Nilai ────────────────────────────
-            IdentificationCard()
+            IdentificationCard(
+                ingredientName = ingredientName,
+                ingredientCategory = ingredientCategory,
+                quantityDisplay = quantityDisplay
+            )
 
             // ── 5. Tombol Aksi Bawah ──────────────────────────────────────────
             ActionButtonsM05(
                 uiState = uiState,
-                onSubmitWriteOff = onSubmitWriteOff,
+                selectedClass = selectedClass,
+                onSubmitWriteOff = {
+                    val finalCls = if (uiState.requiresHumanReview && selectedClass == FreshnessClass.UNCERTAIN.name) {
+                        FreshnessClass.SPOILED.name
+                    } else {
+                        selectedClass
+                    }
+                    onSubmitWriteOff(finalCls, uiState.confidenceScore)
+                },
                 onRescan = {
-                    // Prioritaskan capture kamera nyata bila disediakan.
+                    capturedBitmap = null
                     if (onRequestCapture != null) {
                         onRequestCapture()
-                    } else {
-                        // Fallback uji-coba: gambar placeholder agar pipeline
-                        // inferensi tetap dapat dijalankan/di-demo tanpa kamera.
-                        viewModel.classify(createPlaceholderBitmap())
                     }
                 }
             )
@@ -134,13 +169,17 @@ private fun TopBarM05(onNavigateBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(Color.White)
                         .clickable { onNavigateBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👨‍🍳", fontSize = 20.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
@@ -276,126 +315,194 @@ private fun ModelIndicator(uiState: AiVerificationUiState) {
 // 2. Card Frame Kamera
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun CameraFrameCard(uiState: AiVerificationUiState) {
+private fun CameraFrameCard(
+    uiState: AiVerificationUiState,
+    capturedBitmap: Bitmap?,
+    onCapture: (Bitmap) -> Unit,
+    onRetake: () -> Unit
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val previewView = remember { PreviewView(context) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-            .height(240.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.DarkGray), // Placeholder foto
+            .height(260.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Black),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Mock background image (gray for now to represent the photo)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF334155)) // Slate gray
-            )
-            
+            if (capturedBitmap != null) {
+                // Tampilkan foto hasil tangkapan kamera
+                Image(
+                    bitmap = capturedBitmap.asImageBitmap(),
+                    contentDescription = "Hasil Foto Bahan",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Live Camera Viewfinder via CameraX
+                CameraPermissionGate(
+                    permissionDeniedMessage = "Akses kamera diperlukan untuk memindai mutu bahan secara real-time.",
+                    onDismiss = {}
+                ) {
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { ctx ->
+                            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                            cameraProviderFuture.addListener({
+                                val cameraProvider = cameraProviderFuture.get()
+                                val preview = CameraPreview.Builder().build().also {
+                                    it.surfaceProvider = previewView.surfaceProvider
+                                }
+                                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                                try {
+                                    cameraProvider.unbindAll()
+                                    cameraProvider.bindToLifecycle(
+                                        lifecycleOwner,
+                                        cameraSelector,
+                                        preview
+                                    )
+                                } catch (exc: Exception) {
+                                    exc.printStackTrace()
+                                }
+                            }, ContextCompat.getMainExecutor(ctx))
+                            previewView
+                        }
+                    )
+                }
+            }
+
             // HUD Overlay (Top)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // TFLite Status
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CropFree,
-                        contentDescription = null,
-                        tint = PrimaryOrange,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "${uiState.modelVersion} • Offline",
-                        fontFamily = JetBrainsMonoFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        color = Color.White
-                    )
-                }
-                
-                // REC Indicator
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(Color.Red)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "REC 60 FPS",
-                        fontFamily = JetBrainsMonoFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 10.sp,
-                        color = Color.White
-                    )
-                }
-            }
-            
-            // Focus Brackets (Orange Corners)
-            val bracketColor = PrimaryOrange
-            val thickness = 2.dp
-            val length = 24.dp
-            
-            // Top Left
-            Box(Modifier.align(Alignment.TopStart).padding(start = 24.dp, top = 36.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(topStart = 4.dp)).padding(start = thickness, top = thickness).background(Color.Transparent))
-            // Top Right
-            Box(Modifier.align(Alignment.TopEnd).padding(end = 24.dp, top = 36.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(topEnd = 4.dp)).padding(end = thickness, top = thickness).background(Color.Transparent))
-            // Bottom Left
-            Box(Modifier.align(Alignment.BottomStart).padding(start = 24.dp, bottom = 48.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(bottomStart = 4.dp)).padding(start = thickness, bottom = thickness).background(Color.Transparent))
-            // Bottom Right
-            Box(Modifier.align(Alignment.BottomEnd).padding(end = 24.dp, bottom = 48.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(bottomEnd = 4.dp)).padding(end = thickness, bottom = thickness).background(Color.Transparent))
-
-            // Bottom Controls Bar
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
-                color = Color.White
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.Black.copy(alpha = 0.6f)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Icon(
                             imageVector = Icons.Default.CropFree,
                             contentDescription = null,
                             tint = PrimaryOrange,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Auto-Focus Lensa Makro",
-                            fontFamily = InterFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
-                            color = TextPrimary
-                        )
-                    }
-                    
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.FlashlightOn,
-                            contentDescription = null,
-                            tint = TextSecondary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "TORCH ON",
+                            text = "${uiState.modelVersion} • On-Device",
                             fontFamily = JetBrainsMonoFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 10.sp,
-                            color = TextSecondary
+                            color = Color.White
                         )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.Black.copy(alpha = 0.6f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(if (capturedBitmap != null) Color(0xFF16A34A) else Color.Red)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (capturedBitmap != null) "FRAME TERTANGKAP" else "LIVE CAMERA",
+                            fontFamily = JetBrainsMonoFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Focus Brackets (Orange Corners)
+            val bracketColor = PrimaryOrange
+            val thickness = 2.dp
+            val length = 24.dp
+
+            Box(Modifier.align(Alignment.TopStart).padding(start = 24.dp, top = 40.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(topStart = 4.dp)).padding(start = thickness, top = thickness).background(Color.Transparent))
+            Box(Modifier.align(Alignment.TopEnd).padding(end = 24.dp, top = 40.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(topEnd = 4.dp)).padding(end = thickness, top = thickness).background(Color.Transparent))
+            Box(Modifier.align(Alignment.BottomStart).padding(start = 24.dp, bottom = 54.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(bottomStart = 4.dp)).padding(start = thickness, bottom = thickness).background(Color.Transparent))
+            Box(Modifier.align(Alignment.BottomEnd).padding(end = 24.dp, bottom = 54.dp).size(length).border(BorderStroke(thickness, bracketColor), RoundedCornerShape(bottomEnd = 4.dp)).padding(end = thickness, bottom = thickness).background(Color.Transparent))
+
+            // Bottom Shutter / Retake Bar
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                color = Color.Black.copy(alpha = 0.65f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (capturedBitmap != null) {
+                        Button(
+                            onClick = onRetake,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.25f)),
+                            shape = RoundedCornerShape(50.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Pindai Ulang Kamera",
+                                fontFamily = InterFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = Color.White
+                            )
+                        }
+                    } else {
+                        Button(
+                            onClick = {
+                                val bmp = previewView.bitmap ?: createPlaceholderBitmap()
+                                onCapture(bmp)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
+                            shape = RoundedCornerShape(50.dp),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Ambil & Analisis AI",
+                                fontFamily = InterFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -407,14 +514,18 @@ private fun CameraFrameCard(uiState: AiVerificationUiState) {
 // 3. Card Hasil Analisis AI
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun AiAnalysisResultCard(uiState: AiVerificationUiState) {
+private fun AiAnalysisResultCard(
+    uiState: AiVerificationUiState,
+    selectedClass: String,
+    onSelectClass: (String) -> Unit
+) {
     // Warna aksen & status diturunkan dari state AI yang nyata.
     val accentColor: Color = when {
         !uiState.isModelAvailable -> TextSecondary
         uiState.phase == AiScanPhase.ANALYZING -> PrimaryOrange
         uiState.requiresHumanReview -> PrimaryOrange
-        uiState.predictedClass == FreshnessClass.SPOILED.name ||
-            uiState.predictedClass == FreshnessClass.REJECT.name -> StatusRedBg
+        selectedClass == FreshnessClass.SPOILED.name ||
+            selectedClass == FreshnessClass.REJECT.name -> StatusRedBg
         else -> Color(0xFF059669)
     }
 
@@ -493,7 +604,12 @@ private fun AiAnalysisResultCard(uiState: AiVerificationUiState) {
                         IdleBody()
 
                     AiScanPhase.DONE ->
-                        ResultBody(uiState = uiState, accentColor = accentColor)
+                        ResultBody(
+                            uiState = uiState,
+                            selectedClass = selectedClass,
+                            onSelectClass = onSelectClass,
+                            accentColor = accentColor
+                        )
                 }
             }
         }
@@ -562,16 +678,16 @@ private fun ModelUnavailableBody(uiState: AiVerificationUiState) {
 @Composable
 private fun IdleBody() {
     Text(
-        text = "Siap Memindai",
+        text = "Siap Memindai Bahan",
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 22.sp,
+        fontSize = 20.sp,
         color = TextPrimary
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
-        text = "Arahkan kamera ke bahan lalu tekan Analisis untuk menjalankan " +
-            "klasifikasi kesegaran on-device.",
+        text = "Arahkan kamera ke bahan lalu tekan tombol Ambil & Analisis AI di atas untuk menjalankan " +
+            "klasifikasi kesegaran on-device secara instan.",
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
@@ -602,12 +718,17 @@ private fun AnalyzingBody() {
 
 /** Body saat inferensi selesai (model tersedia). */
 @Composable
-private fun ResultBody(uiState: AiVerificationUiState, accentColor: Color) {
+private fun ResultBody(
+    uiState: AiVerificationUiState,
+    selectedClass: String,
+    onSelectClass: (String) -> Unit,
+    accentColor: Color
+) {
     // Status badge
     Row(verticalAlignment = Alignment.CenterVertically) {
         Surface(shape = RoundedCornerShape(4.dp), color = accentColor) {
             Text(
-                text = "STATUS ${uiState.predictedClass}",
+                text = "STATUS $selectedClass",
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                 fontFamily = InterFontFamily,
                 fontWeight = FontWeight.Bold,
@@ -633,7 +754,7 @@ private fun ResultBody(uiState: AiVerificationUiState, accentColor: Color) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = titleFor(uiState),
+            text = titleForClass(selectedClass),
             fontFamily = InterFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 22.sp,
@@ -654,7 +775,7 @@ private fun ResultBody(uiState: AiVerificationUiState, accentColor: Color) {
     Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        text = descriptionFor(uiState),
+        text = descriptionForClass(selectedClass),
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
@@ -665,7 +786,7 @@ private fun ResultBody(uiState: AiVerificationUiState, accentColor: Color) {
     Spacer(modifier = Modifier.height(8.dp))
 
     Text(
-        text = "Waktu inferensi: ${uiState.inferenceTimeMs} ms",
+        text = "Waktu inferensi: ${uiState.inferenceTimeMs} ms • Prediksi Awal: ${uiState.predictedClass}",
         fontFamily = JetBrainsMonoFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 10.sp,
@@ -674,55 +795,87 @@ private fun ResultBody(uiState: AiVerificationUiState, accentColor: Color) {
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    // Kotak SOP / call-to-action manusia
+    // Kotak SOP / decision support & manual selection
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = Color(0xFFF8FAFC),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.VerifiedUser,
-                contentDescription = null,
-                tint = accentColor,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = if (uiState.requiresHumanReview) {
-                        "Diperlukan Verifikasi Manual"
-                    } else {
-                        "Decision Support (AI)"
-                    },
-                    fontFamily = InterFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp,
-                    color = TextPrimary
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    imageVector = Icons.Outlined.VerifiedUser,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = if (uiState.requiresHumanReview) {
-                        "Confidence di bawah 85%. AI tidak berhak menolak otomatis — " +
-                            "staff wajib mengonfirmasi secara manual."
-                    } else {
-                        "Hasil AI bersifat pendukung keputusan. Keputusan akhir tetap " +
-                            "pada staff sesuai SOP."
-                    },
-                    fontFamily = InterFontFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 10.sp,
-                    color = TextSecondary
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = if (uiState.requiresHumanReview) {
+                            "Perlu Observasi Manual (Confidence < 85%)"
+                        } else {
+                            "Decision Support (AI Terverifikasi)"
+                        },
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = if (uiState.requiresHumanReview) {
+                            "TFLite menghasilkan status UNCERTAIN (ambang 85%). AI tidak berhak auto-reject. Pilih observasi visual fisik di bawah:"
+                        } else {
+                            "Hasil AI bersifat pendukung keputusan. Anda dapat mengubah kelas mutu jika evaluasi fisik berbeda."
+                        },
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 10.sp,
+                        color = TextSecondary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Selector Mutu Fisik (Decision Support & Override)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf(
+                    FreshnessClass.FRESH.name to Color(0xFF16A34A),
+                    FreshnessClass.ACCEPTABLE.name to Color(0xFFD97706),
+                    FreshnessClass.SPOILED.name to Color(0xFFEA580C),
+                    FreshnessClass.REJECT.name to Color(0xFFDC2626)
+                ).forEach { (cls, color) ->
+                    val isSelected = selectedClass == cls
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isSelected) color else Color.White,
+                        border = BorderStroke(1.dp, if (isSelected) color else Color(0xFFCBD5E1)),
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onSelectClass(cls) }
+                    ) {
+                        Text(
+                            text = cls,
+                            fontFamily = InterFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            color = if (isSelected) Color.White else TextPrimary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-private fun titleFor(uiState: AiVerificationUiState): String = when (uiState.predictedClass) {
+private fun titleForClass(className: String): String = when (className) {
     FreshnessClass.FRESH.name -> "SEGAR / FRESH"
     FreshnessClass.ACCEPTABLE.name -> "MASIH LAYAK"
     FreshnessClass.SPOILED.name -> "BASI / SPOILED"
@@ -730,15 +883,15 @@ private fun titleFor(uiState: AiVerificationUiState): String = when (uiState.pre
     else -> "PERLU OBSERVASI"
 }
 
-private fun descriptionFor(uiState: AiVerificationUiState): String = when (uiState.predictedClass) {
+private fun descriptionForClass(className: String): String = when (className) {
     FreshnessClass.FRESH.name ->
-        "Bahan dalam kondisi segar optimal dan layak digunakan."
+        "Bahan dalam kondisi segar optimal dan layak digunakan dalam operasional."
     FreshnessClass.ACCEPTABLE.name ->
         "Bahan masih layak pakai namun perlu segera diprioritaskan penggunaannya."
     FreshnessClass.SPOILED.name ->
-        "Bahan terindikasi mulai membusuk. Verifikasi visual lanjutan disarankan."
+        "Bahan terindikasi mulai membusuk / basi. Disarankan untuk write-off."
     FreshnessClass.REJECT.name ->
-        "Bahan tidak layak konsumsi berdasarkan klasifikasi model kesegaran."
+        "Bahan tidak layak konsumsi dan harus segera dimusnahkan."
     else ->
         "Model tidak cukup yakin pada gambar ini. Lakukan observasi visual manual."
 }
@@ -755,7 +908,11 @@ private fun riskLabel(uiState: AiVerificationUiState): String = when {
 // 4. Card Identifikasi Bahan & Nilai
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun IdentificationCard() {
+private fun IdentificationCard(
+    ingredientName: String?,
+    ingredientCategory: String?,
+    quantityDisplay: String?
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -767,7 +924,7 @@ private fun IdentificationCard() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "IDENTIFIKASI BAHAN & NILAI",
+                text = "IDENTIFIKASI BAHAN DARI FORM",
                 fontFamily = InterFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
@@ -776,14 +933,14 @@ private fun IdentificationCard() {
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.Memory, // Placeholder IoT icon
+                    imageVector = Icons.Default.Memory,
                     contentDescription = null,
-                    tint = Color(0xFF059669), // Green
+                    tint = Color(0xFF059669),
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "IoT Tereduksi",
+                    text = "Konteks Terhubung",
                     fontFamily = InterFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 10.sp,
@@ -797,7 +954,7 @@ private fun IdentificationCard() {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            color = Color(0xFFF1F5F9), // Gray background
+            color = Color(0xFFF1F5F9),
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -805,9 +962,9 @@ private fun IdentificationCard() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Kiri
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Wagyu Ribeye MB7",
+                        text = ingredientName ?: "Bahan Terpilih (Kitchen Station)",
                         fontFamily = InterFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -815,7 +972,7 @@ private fun IdentificationCard() {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "SKU: ING-MEAT-004 • Chiller A2",
+                        text = ingredientCategory ?: "Kategori: Bahan Baku Dapur",
                         fontFamily = JetBrainsMonoFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 10.sp,
@@ -825,31 +982,20 @@ private fun IdentificationCard() {
                 
                 // Kanan
                 Column(horizontalAlignment = Alignment.End) {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "1.45",
-                            fontFamily = JetBrainsMonoFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = Color(0xFF92400E) // Coklat
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "kg",
-                            fontFamily = JetBrainsMonoFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp,
-                            color = Color(0xFF92400E),
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        )
-                    }
+                    Text(
+                        text = quantityDisplay ?: "—",
+                        fontFamily = JetBrainsMonoFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color(0xFF92400E)
+                    )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Nilai: Rp 217.500",
+                        text = "Kuantitas Waste",
                         fontFamily = JetBrainsMonoFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 10.sp,
-                        color = StatusRedBg
+                        color = TextSecondary
                     )
                 }
             }
@@ -863,6 +1009,7 @@ private fun IdentificationCard() {
 @Composable
 private fun ActionButtonsM05(
     uiState: AiVerificationUiState,
+    selectedClass: String,
     onSubmitWriteOff: () -> Unit,
     onRescan: () -> Unit
 ) {
@@ -873,7 +1020,6 @@ private fun ActionButtonsM05(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Tombol Utama Oranye — menuliskan hasil ke record waste.
-        // Dinonaktifkan selama analisis berjalan.
         Button(
             onClick = onSubmitWriteOff,
             enabled = uiState.phase != AiScanPhase.ANALYZING,
@@ -890,13 +1036,13 @@ private fun ActionButtonsM05(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Save, // Placeholder for upload/save
+                    imageVector = Icons.Outlined.Save,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Gunakan Hasil & Ajukan Write-Off",
+                    text = "Gunakan Mutu $selectedClass & Lanjutkan",
                     fontFamily = InterFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
@@ -944,10 +1090,6 @@ private fun ActionButtonsM05(
 
 /**
  * Membuat Bitmap abu-abu berukuran 224x224 sebagai placeholder uji-coba.
- *
- * Dipakai HANYA ketika tidak ada sumber kamera ([AiVerificationScreen.onRequestCapture]
- * null), agar pipeline inferensi tetap dapat dijalankan. Input ini tetap
- * melewati model TFLite yang sama — tidak ada nilai hasil yang dipalsukan.
  */
 private fun createPlaceholderBitmap(): android.graphics.Bitmap {
     val size = 224
@@ -975,11 +1117,14 @@ private fun AiVerificationScreenPreview() {
             .applicationContext as android.app.Application
         AiVerificationScreen(
             onNavigateBack = {},
-            onSubmitWriteOff = {},
+            onSubmitWriteOff = { _, _ -> },
             viewModel = AiVerificationViewModel(
                 application = app,
                 freshnessClassifier = com.csm.kitchenguard.utils.ai.FreshnessClassifier(app)
-            )
+            ),
+            ingredientName = "Wagyu Ribeye MB7",
+            ingredientCategory = "Meat & Butcher",
+            quantityDisplay = "1.45 kg"
         )
     }
 }

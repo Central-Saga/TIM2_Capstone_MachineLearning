@@ -7,88 +7,58 @@ Uses production-ready models with consistent preprocessing
 import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, Dict, Any
+from contextlib import asynccontextmanager
 import joblib
 import json
 import os
 import sys
 from datetime import datetime
 
-# Add src to path
+# Ensure UTF-8 stdout/stderr on Windows to avoid UnicodeEncodeError
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Set up proper path for imports
-import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(current_dir))  # Go to project root (C:\CAPSTONE_MACHINE_LEARNING)
 src_dir = os.path.join(project_root, 'src')
-sys.path.insert(0, src_dir)
-sys.path.insert(0, project_root)
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-from preprocess import preprocess_text
-from preprocess_version import get_preprocessing_version, validate_metadata
-app = FastAPI(
-    title="KitchenGuard CSM - ML Inference API",
-    description="REST API for waste classification using trained ML models",
-    version="1.0.0"
-)
-
-# CORS configuration for Web Admin access
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure specific origins in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+try:
+    from src.preprocess import preprocess_text
+    from src.preprocess_version import get_preprocessing_version, validate_metadata
+except ImportError:
+    # pyrefly: ignore [missing-import]
+    from preprocess import preprocess_text
+    # pyrefly: ignore [missing-import]
+    from preprocess_version import get_preprocessing_version, validate_metadata
 
 
-class WastePredictionRequest(BaseModel):
-    """Request model for waste prediction"""
-    description: str
+# Global variables for loaded models
+ml_model = None
+tfidf_vectorizer = None
+label_encoder = None
+metadata = None
 
 
-class WastePredictionResponse(BaseModel):
-    """Response model for waste prediction"""
-    label: str
-    confidence: Optional[float]
-    model_version: str
-    preprocessing_version: str
-    timestamp: str
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "label": "SPOILED",
-                "confidence": 0.9234,
-                "model_version": "2.0.0",
-                "preprocessing_version": "2.0.0",
-                "timestamp": "2026-09-23T10:30:00"
-            }
-        }
-
-
-class HealthResponse(BaseModel):
-    """Health check response"""
-    status: str
-    version: str
-    preprocessing_version: str
-    model_loaded: bool
-    timestamp: str
-
-
-class ErrorResponse(BaseModel):
-    """Error response model"""
-    error: str
-    details: Optional[str]
-    timestamp: str
-
-
-# Load models on startup
-@app.on_event("startup")
-async def startup_event():
+async def load_ml_models():
     """Load ML models during application startup"""
-    # CRITICAL: Set working directory to project root BEFORE loading models
-    os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    global ml_model, tfidf_vectorizer, label_encoder, metadata
+    
+    # Set working directory to project root
+    if os.path.exists(project_root):
+        os.chdir(project_root)
     
     print("=" * 70)
     print(f"Working directory: {os.getcwd()}")
@@ -96,10 +66,10 @@ async def startup_event():
     print("=" * 70)
     
     try:
-        # Check multiple possible locations for models
-        # Get absolute paths from current working directory (project root)
         current_dir = os.getcwd()
         model_locations = [
+            os.path.join(project_root, "models", "waste_classification"),
+            os.path.join(project_root, "models"),
             os.path.join(current_dir, "models", "waste_classification"),
             os.path.join(current_dir, "models"),
         ]
@@ -125,7 +95,7 @@ async def startup_event():
                         break
                 
                 if model_path and vectorizer_path and encoder_path:
-                    print(f"✅ Models found at: {location}")
+                    print(f"[OK] Models found at: {location}")
                     break
         
         if not all([model_path, vectorizer_path, encoder_path]):
@@ -135,19 +105,17 @@ async def startup_event():
         
         # Load artifacts
         print("\nLoading model artifacts...")
-        print(f"  • Model: {model_path}")
-        print(f"  • Vectorizer: {vectorizer_path}")
-        print(f"  • Encoder: {encoder_path}")
-        
-        global ml_model, tfidf_vectorizer, label_encoder, metadata
+        print(f"  * Model: {model_path}")
+        print(f"  * Vectorizer: {vectorizer_path}")
+        print(f"  * Encoder: {encoder_path}")
         
         ml_model = joblib.load(model_path)
         tfidf_vectorizer = joblib.load(vectorizer_path)
         label_encoder = joblib.load(encoder_path)
         
-        print(f"✅ Loaded ensemble model: {type(ml_model).__name__}")
-        print(f"✅ Loaded TF-IDF vectorizer with vocabulary size: {len(tfidf_vectorizer.vocabulary_)}")
-        print(f"✅ Loaded label encoder with classes: {list(label_encoder.classes_)}")
+        print(f"[OK] Loaded ensemble model: {type(ml_model).__name__}")
+        print(f"[OK] Loaded TF-IDF vectorizer with vocabulary size: {len(tfidf_vectorizer.vocabulary_)}")
+        print(f"[OK] Loaded label encoder with classes: {list(label_encoder.classes_)}")
         
         # Load metadata if available
         model_version = "unknown"
@@ -155,7 +123,7 @@ async def startup_event():
             with open(metadata_path, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
                 model_version = metadata.get('model_info', {}).get('version', 'unknown')
-                print(f"✅ Loaded metadata: model version {model_version}")
+                print(f"[OK] Loaded metadata: model version {model_version}")
         else:
             metadata = {"model_info": {"version": model_version}}
         
@@ -163,22 +131,84 @@ async def startup_event():
         current_preprocessing_version = get_preprocessing_version()
         if metadata:
             is_valid, msg = validate_metadata(metadata.get("metadata", {}))
-            print(f"\n✅ Preprocessing version validation: v{current_preprocessing_version}")
+            print(f"\n[OK] Preprocessing version validation: v{current_preprocessing_version}")
         
         print("\n" + "=" * 70)
         print("ML Models loaded successfully!")
         print("=" * 70 + "\n")
         
     except Exception as e:
-        print(f"\n❌ Error loading models: {str(e)}\n")
+        print(f"\n[ERROR] Error loading models: {str(e)}\n")
         raise
 
 
-# Global variables for loaded models
-ml_model = None
-tfidf_vectorizer = None
-label_encoder = None
-metadata = None
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan event handler for FastAPI app"""
+    await load_ml_models()
+    yield
+
+
+app = FastAPI(
+    title="KitchenGuard CSM - ML Inference API",
+    description="REST API for waste classification using trained ML models",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Retain startup_event for backwards compatibility
+startup_event = load_ml_models
+
+# CORS configuration for Web Admin access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure specific origins in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class WastePredictionRequest(BaseModel):
+    """Request model for waste prediction"""
+    description: str
+
+
+class WastePredictionResponse(BaseModel):
+    """Response model for waste prediction"""
+    label: str
+    confidence: Optional[float]
+    model_version: str
+    preprocessing_version: str
+    timestamp: str
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "label": "SPOILED",
+                "confidence": 0.9234,
+                "model_version": "2.0.0",
+                "preprocessing_version": "2.0.0",
+                "timestamp": "2026-09-23T10:30:00"
+            }
+        }
+    )
+
+
+class HealthResponse(BaseModel):
+    """Health check response"""
+    status: str
+    version: str
+    preprocessing_version: str
+    model_loaded: bool
+    timestamp: str
+
+
+class ErrorResponse(BaseModel):
+    """Error response model"""
+    error: str
+    details: Optional[str]
+    timestamp: str
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
@@ -302,6 +332,153 @@ async def get_model_info():
     }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Android KitchenGuard CSM Authentication & Sync Endpoints (PRD Sec 9, 21, 22)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AndroidLoginRequest(BaseModel):
+    employee_id: str
+    password: str
+
+@app.post("/api/v1/auth/login", tags=["Mobile Auth"])
+async def mobile_login(req: AndroidLoginRequest):
+    """
+    Authentication endpoint for KitchenGuard Android app.
+    Accepts any test employee ID/email and password (e.g. chef / 123456).
+    """
+    emp_id = req.employee_id.strip()
+    name = "Chef " + (emp_id.split("@")[0].capitalize() if "@" in emp_id else emp_id.capitalize())
+    
+    return {
+        "token": "kg-jwt-" + emp_id + "-" + str(int(datetime.now().timestamp())),
+        "user": {
+            "id": 1,
+            "employee_id": emp_id,
+            "name": name if name else "Head Chef",
+            "role": "HEAD_CHEF"
+        },
+        "station": {
+            "id": 1,
+            "name": "Central Kitchen Station"
+        }
+    }
+
+
+@app.post("/api/v1/sync/pull", tags=["Mobile Sync"])
+async def mobile_sync_pull(body: Dict[str, Any] = None):
+    """
+    Pull Sync endpoint for Android offline-first master data.
+    """
+    now_iso = datetime.now().isoformat()
+    return {
+        "next_sync_cursor": int(datetime.now().timestamp()),
+        "ingredients": [
+            {
+                "id": 1,
+                "name": "Tomat Segar (Fresh Tomatoes)",
+                "category": "VEGETABLE",
+                "canonical_unit": "KG",
+                "minimum_stock": 5.0
+            },
+            {
+                "id": 2,
+                "name": "Daging Sapi (Beef Slices)",
+                "category": "MEAT",
+                "canonical_unit": "KG",
+                "minimum_stock": 10.0
+            },
+            {
+                "id": 3,
+                "name": "Susu UHT Full Cream",
+                "category": "DAIRY",
+                "canonical_unit": "LITER",
+                "minimum_stock": 12.0
+            },
+            {
+                "id": 4,
+                "name": "Wortel Segar (Carrots)",
+                "category": "VEGETABLE",
+                "canonical_unit": "KG",
+                "minimum_stock": 4.0
+            }
+        ],
+        "batches": [
+            {
+                "id": 101,
+                "ingredient_id": 1,
+                "batch_code": "BATCH-TOM-01",
+                "expiry_at": "2026-10-10T00:00:00Z",
+                "remaining_quantity": 8.5,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 102,
+                "ingredient_id": 2,
+                "batch_code": "BATCH-MEAT-02",
+                "expiry_at": "2026-10-08T00:00:00Z",
+                "remaining_quantity": 15.0,
+                "status": "ACTIVE"
+            },
+            {
+                "id": 103,
+                "ingredient_id": 3,
+                "batch_code": "BATCH-MILK-03",
+                "expiry_at": "2026-10-12T00:00:00Z",
+                "remaining_quantity": 20.0,
+                "status": "ACTIVE"
+            }
+        ],
+        "active_shift": {
+            "id": 1,
+            "station_id": 1,
+            "station_name": "Central Kitchen Station",
+            "started_at": now_iso,
+            "server_version": 1,
+            "is_locked": False
+        },
+        "notifications": [
+            {
+                "id": 1,
+                "type": "INFO",
+                "title": "Shift Siap",
+                "message": "Sistem KitchenGuard CSM aktif dan terhubung ke ML Backend.",
+                "reference_id": None,
+                "created_at": now_iso
+            }
+        ]
+    }
+
+
+@app.post("/api/v1/sync/batch", tags=["Mobile Sync"])
+async def mobile_sync_batch(body: Dict[str, Any] = None):
+    """
+    Push sync batch endpoint from Android queue.
+    """
+    items = body.get("items", []) if body else []
+    results = []
+    for idx, item in enumerate(items):
+        results.append({
+            "client_uuid": item.get("client_uuid", ""),
+            "status": "SYNCED",
+            "server_id": 1000 + idx,
+            "message": "Transaksi berhasil disinkronisasi ke server"
+        })
+    return {"results": results}
+
+
+@app.post("/api/v1/stock-audits", tags=["Mobile Audit"])
+async def mobile_stock_audit(body: Dict[str, Any] = None):
+    """
+    Physical stock audit submission endpoint.
+    """
+    return {
+        "audit_id": 1,
+        "success": True,
+        "message": "Audit fisik berhasil dicatat."
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

@@ -1,6 +1,9 @@
 package com.csm.kitchenguard.presentation.screens.audit
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.painterResource
+import com.csm.kitchenguard.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -54,14 +57,17 @@ private val OutlineColor = Color(0xFFE2E8F0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShiftSummaryScreen() {
+fun ShiftSummaryScreen(
+    onNavigateBack: () -> Unit = {},
+    onNavigateToAudit: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundLight)
     ) {
         // ── 1. Top App Bar ────────────────────────────────────────────────────
-        TopBarM07()
+        TopBarM07(onNavigateBack = onNavigateBack)
 
         // Konten utama scrollable
         Column(
@@ -95,7 +101,7 @@ fun ShiftSummaryScreen() {
 // 1. Top Bar
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun TopBarM07() {
+private fun TopBarM07(onNavigateBack: () -> Unit = {}) {
     Surface(
         color = PrimaryOrange,
         shadowElevation = 0.dp
@@ -111,12 +117,17 @@ private fun TopBarM07() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
-                        .background(Color.White),
+                        .background(Color.White)
+                        .clickable { onNavigateBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👨‍🍳", fontSize = 20.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {

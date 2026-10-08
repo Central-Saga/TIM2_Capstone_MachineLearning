@@ -1,9 +1,12 @@
 package com.csm.kitchenguard.presentation.screens.auth
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.painterResource
+import com.csm.kitchenguard.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,14 +108,17 @@ fun LoginScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     
-    var identifier      by rememberSaveable { mutableStateOf("") }
-    var password        by rememberSaveable { mutableStateOf("") }
+    var identifier      by rememberSaveable { mutableStateOf("chef@csm.id") }
+    var password        by rememberSaveable { mutableStateOf("password123") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    var rememberMe      by rememberSaveable { mutableStateOf(false) }
+    var rememberMe      by rememberSaveable { mutableStateOf(true) }
 
     // Navigasi saat login berhasil
     LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) onLoginSuccess()
+        if (uiState.isSuccess) {
+            viewModel.resetState()
+            onLoginSuccess()
+        }
     }
 
     // Tampilkan error via Snackbar
@@ -195,34 +201,27 @@ private fun LoginHeader() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Kartu logo putih dengan piring hijau dan emoji koki
+        // Kartu logo putih dengan logo chef resmi KitchenGuard
         Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(96.dp)
                 .shadow(
                     elevation      = 8.dp,
-                    shape          = RoundedCornerShape(20.dp),
+                    shape          = RoundedCornerShape(22.dp),
                     ambientColor   = Color.Black.copy(alpha = 0.08f),
                     spotColor      = Color.Black.copy(alpha = 0.12f)
                 )
-                .clip(RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(22.dp))
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Box(
+            Image(
+                painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                contentDescription = "Logo KitchenGuard",
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(Color(0xFF66BB6A), Color(0xFF388E3C)),
-                            radius = 120f
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "👨‍🍳", fontSize = 32.sp)
-            }
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(18.dp))
+            )
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -543,35 +542,16 @@ private fun OfflineResilienceBanner() {
 private fun LoginFooter() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(bottom = 12.dp)
     ) {
-        Row(
-            verticalAlignment     = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector        = Icons.Default.Lock,
-                contentDescription = null,
-                tint               = TextSecondary.copy(alpha = 0.5f),
-                modifier           = Modifier.size(12.dp)
-            )
-            Text(
-                text          = "NODE BALI-STN-04  •  KITCHEN OPS v2.4.9",
-                fontFamily    = JetBrainsMonoFamily,
-                fontWeight    = FontWeight.Normal,
-                fontSize      = 10.sp,
-                color         = TextSecondary.copy(alpha = 0.7f),
-                letterSpacing = 0.4.sp
-            )
-        }
         Text(
-            text       = "Aplikasi internal CSM Culinary Group. Akses terbatas untuk staf terverifikasi.",
-            fontFamily = InterFontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize   = 11.sp,
-            color      = TextSecondary.copy(alpha = 0.6f),
-            textAlign  = TextAlign.Center,
-            lineHeight = 16.sp
+            text          = "KitchenGuard CSM Culinary Group • v1.4",
+            fontFamily    = InterFontFamily,
+            fontWeight    = FontWeight.Medium,
+            fontSize      = 11.sp,
+            color         = TextSecondary.copy(alpha = 0.6f),
+            letterSpacing = 0.3.sp
         )
     }
 }

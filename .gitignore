@@ -83,3 +83,8 @@ TIM_2_ANDROID/
 KitchenGuard-CSM/
 Tim2_Capstone_Website_Admin/
 
+# Local Dev Screenshots & Temp Files
+/*.png
+wait_emulator.ps1
+test_compat.tflite
+

@@ -27,7 +27,10 @@ try:
     import joblib
     import numpy as np
     from sklearn.feature_extraction.text import TfidfVectorizer
-    from preprocess import preprocess_text
+    try:
+        from src.preprocess import preprocess_text
+    except ImportError:
+        from preprocess import preprocess_text
     
     # Load models
     vectorizer = joblib.load('models/waste_classification/tfidf_vectorizer.joblib')

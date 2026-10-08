@@ -46,6 +46,10 @@ class AuthViewModel(
         }
     }
     
+    fun resetState() {
+        _uiState.update { LoginUiState() }
+    }
+
     fun dismissError() {
         _uiState.update { it.copy(error = null) }
     }
