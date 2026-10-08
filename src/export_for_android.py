@@ -5,18 +5,29 @@ Replaces hardcoded if-else with real ML inference.
 """
 
 import os
+import sys
 import json
 import joblib
 import numpy as np
 from datetime import datetime
 from typing import Dict, Any
 
+# Ensure UTF-8 stdout/stderr on Windows to avoid UnicodeEncodeError
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Try to install tensorflow-lite if available
 try:
     from tflite_runtime.interpreter import Interpreter
     HAS_TFLITE = True
 except ImportError:
-    print("⚠️  tflite-runtime not installed. Using fallback export.")
+    print("[WARNING] tflite-runtime not installed. Using fallback export.")
     HAS_TFLITE = False
 
 

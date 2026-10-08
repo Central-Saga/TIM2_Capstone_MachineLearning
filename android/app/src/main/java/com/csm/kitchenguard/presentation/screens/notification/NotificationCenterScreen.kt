@@ -1,7 +1,10 @@
 package com.csm.kitchenguard.presentation.screens.notification
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.painterResource
+import com.csm.kitchenguard.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -155,13 +158,17 @@ private fun TopBarM08(onNavigateBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(Color.White)
                         .clickable { onNavigateBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👨‍🍳", fontSize = 20.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {

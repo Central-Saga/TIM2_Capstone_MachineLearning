@@ -1,7 +1,10 @@
 package com.csm.kitchenguard.presentation.screens.audit
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.painterResource
+import com.csm.kitchenguard.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -120,13 +123,17 @@ private fun TopBarM06(onNavigateBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(Color.White)
                         .clickable { onNavigateBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👨‍🍳", fontSize = 20.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
@@ -398,7 +405,11 @@ private fun GramationWarningCard() {
                     .background(Color(0xFFF8FAFC)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("👨‍🍳", fontSize = 24.sp) // Placeholder ilustrasi chef timbangan
+                Image(
+                    painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                    contentDescription = "Chef",
+                    modifier = Modifier.size(28.dp)
+                )
             }
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -503,11 +514,11 @@ private fun PhysicalItemListSection(drafts: List<StockAuditDraftEntity>) {
                 }
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(drafts, key = { it.id }) { draft ->
+                drafts.forEach { draft ->
                     AuditItemCard(
                         draft = draft,
                         onActualPhysicalChanged = { newPhysical ->

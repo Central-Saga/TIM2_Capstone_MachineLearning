@@ -151,6 +151,17 @@ abstract class AppDatabase : RoomDatabase() {
             super.onCreate(db)
             seedIngredients(db)
             seedBatches(db)
+            seedActiveShift(db)
+        }
+
+        private fun seedActiveShift(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                INSERT OR IGNORE INTO active_shift
+                    (shift_id, station_id, station_name, started_at, server_version, is_locked)
+                VALUES (101, 1, 'Hot Kitchen Station', '${daysFromNow(0)}', 1, 0)
+                """.trimIndent()
+            )
         }
 
         // ── Seed Ingredients ──────────────────────────────────────────────────

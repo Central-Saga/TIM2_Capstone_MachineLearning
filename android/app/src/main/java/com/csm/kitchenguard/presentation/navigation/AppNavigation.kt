@@ -31,6 +31,9 @@ import com.csm.kitchenguard.presentation.screens.profile.EditProfileScreen
 import com.csm.kitchenguard.presentation.screens.profile.ChangePasswordScreen
 import com.csm.kitchenguard.presentation.screens.settings.SettingsScreen
 import com.csm.kitchenguard.presentation.screens.audit.StockAuditViewModel
+import com.csm.kitchenguard.presentation.screens.reservation.TableReservationScreen
+import com.csm.kitchenguard.presentation.screens.detail.ItemDetailScreen
+import com.csm.kitchenguard.presentation.screens.tracking.OrderTrackingScreen
 
 
 @Composable
@@ -58,13 +61,18 @@ fun AppNavigation(diContainer: AppModule) {
         Screen.Profile.route,
         Screen.EditProfile.route,
         Screen.ChangePassword.route,
-        Screen.Settings.route
+        Screen.Settings.route,
+        Screen.TableReservation.route,
+        Screen.ItemDetail.route,
+        Screen.OrderTracking.route
     )
 
-    LaunchedEffect(currentRoute, currentRole) {
+    LaunchedEffect(currentRoute, currentRole, profileUiState.isLoading, profileUiState.isSessionMissing) {
         val isProtected = currentRoute != null && currentRoute in protectedRoutes
         val isLoading = profileUiState.isLoading
-        if (isProtected && !isLoading && !currentRole.canAccessKitchenFeatures()) {
+        val isSessionMissing = profileUiState.isSessionMissing
+
+        if (isProtected && !isLoading && (isSessionMissing || (!currentRole.canAccessKitchenFeatures() && profileUiState.role.isNotBlank()))) {
             // Sesi tidak valid atau role tidak dikenal → redirect ke Login
             navController.navigate(Screen.Login.route) {
                 popUpTo(0) { inclusive = true }
@@ -72,11 +80,14 @@ fun AppNavigation(diContainer: AppModule) {
         }
     }
 
-    // Tentukan apakah BottomBar harus disembunyikan
-    // BottomBar tidak dimunculkan di layar Login, Waste Logging, dan Stock Audit
+    // Tentukan apakah BottomBar harus dimunculkan (5 tab sesuai arsitektur PRD v1.1)
     val showBottomBar = currentRoute in listOf(
         Screen.Hub.route,
-        Screen.ShiftSummary.route
+        Screen.StockAudit.route,
+        Screen.ShiftSummary.route,
+        Screen.Profile.route,
+        Screen.TableReservation.route,
+        Screen.OrderTracking.route
     )
 
     Scaffold(
@@ -116,11 +127,15 @@ fun AppNavigation(diContainer: AppModule) {
                 val hubViewModel = diContainer.kitchenHubViewModel
                 KitchenHubScreen(
                     viewModel = hubViewModel,
+                    profileViewModel = diContainer.profileViewModel,
                     onNavigateToWaste = { navController.navigate(Screen.WasteLogging.route) },
                     onNavigateToAudit = { navController.navigate(Screen.StockAudit.route) },
                     onNavigateToNotification = { navController.navigate(Screen.NotificationCenter.route) },
                     onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToDetail = { _ -> navController.navigate(Screen.ItemDetail.route) },
+                    onNavigateToReservation = { navController.navigate(Screen.TableReservation.route) },
+                    onNavigateToTracking = { navController.navigate(Screen.OrderTracking.route) }
                 )
             }
 
@@ -143,18 +158,25 @@ fun AppNavigation(diContainer: AppModule) {
             }
             
             composable(Screen.ShiftSummary.route) {
-                ShiftSummaryScreen()
+                ShiftSummaryScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToAudit = { navController.navigate(Screen.StockAudit.route) }
+                )
             }
             
             composable(Screen.AiVerification.route) {
+                val wasteViewModel = diContainer.wasteLoggingViewModel
+                val wasteUiState by wasteViewModel.uiState.collectAsState()
                 AiVerificationScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onSubmitWriteOff = { 
-                        navController.navigate(Screen.Hub.route) {
-                            popUpTo(Screen.Hub.route) { inclusive = false }
-                        }
+                    onSubmitWriteOff = { chosenClass, confidence -> 
+                        wasteViewModel.onAiResultReceived(chosenClass, confidence)
+                        navController.popBackStack()
                     },
-                    viewModel = diContainer.aiVerificationViewModel
+                    viewModel = diContainer.aiVerificationViewModel,
+                    ingredientName = wasteUiState.selectedIngredient?.name,
+                    ingredientCategory = wasteUiState.selectedIngredient?.category,
+                    quantityDisplay = if (wasteUiState.quantityInput.isNotBlank()) "${wasteUiState.quantityInput} ${wasteUiState.selectedUnit}" else null
                 )
             }
             
@@ -193,6 +215,31 @@ fun AppNavigation(diContainer: AppModule) {
                 SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToNotification = { navController.navigate(Screen.NotificationCenter.route) }
+                )
+            }
+
+            composable(Screen.TableReservation.route) {
+                TableReservationScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ItemDetail.route) {
+                ItemDetailScreen(
+                    itemName = "Sego Ayam Tepung",
+                    itemPrice = "Rp 15.000",
+                    onNavigateBack = { navController.popBackStack() },
+                    onAddToCart = { navController.navigate(Screen.WasteLogging.route) }
+                )
+            }
+
+            composable(Screen.OrderTracking.route) {
+                OrderTrackingScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToWaste = { navController.navigate(Screen.WasteLogging.route) },
+                    onNavigateToAudit = { navController.navigate(Screen.StockAudit.route) },
+                    onNavigateToSummary = { navController.navigate(Screen.ShiftSummary.route) },
+                    onNavigateToSlots = { navController.navigate(Screen.TableReservation.route) }
                 )
             }
         }

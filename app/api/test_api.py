@@ -3,9 +3,20 @@ Test script for KitchenGuard CSM ML REST API
 Tests all endpoints with real-world data samples
 """
 
+import sys
 import requests
 import json
 from typing import Dict, Any
+
+# Ensure UTF-8 stdout/stderr on Windows to avoid UnicodeEncodeError
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 BASE_URL = "http://localhost:8000"
 

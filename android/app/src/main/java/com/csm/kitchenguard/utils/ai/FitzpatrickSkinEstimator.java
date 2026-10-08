@@ -3,23 +3,23 @@
 package com.csm.kitchenguard.utils.ai;
 
 /**
- * Skin Detection Result
- * Uses Fitzpatrick Skin Phototype scale (medical standard)
- * Focus on SUN PROTECTION NEEDS rather than racial categorization
- */
-public class SkinDetectionResult {
-    public String fitzpatrickType;      // I, II, III, IV
-    public String protectionLevel;      // SPF recommendation
-    public String sunSensitivity;       // EXTREME/HIGH/MODERATE/LOW
-    public boolean requiresCoverage;    // Should wear gloves/clothing?
-}
-
-/**
  * Mobile Fitzpatrick Skin Type Estimator
  * Medical-standard approach for sun sensitivity assessment
  * Avoids biased FAIR/NOT_FAIR binary classification
  */
 public class FitzpatrickSkinEstimator {
+
+    /**
+     * Skin Detection Result
+     * Uses Fitzpatrick Skin Phototype scale (medical standard)
+     * Focus on SUN PROTECTION NEEDS rather than racial categorization
+     */
+    public static class SkinDetectionResult {
+        public String fitzpatrickType;      // I, II, III, IV
+        public String protectionLevel;      // SPF recommendation
+        public String sunSensitivity;       // EXTREME/HIGH/MODERATE/LOW
+        public boolean requiresCoverage;    // Should wear gloves/clothing?
+    }
     
     /**
      * Estimate Fitzpatrick type from RGB values

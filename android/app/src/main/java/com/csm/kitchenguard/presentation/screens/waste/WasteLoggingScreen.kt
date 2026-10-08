@@ -1,13 +1,17 @@
 package com.csm.kitchenguard.presentation.screens.waste
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.painterResource
+import com.csm.kitchenguard.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,12 +24,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material3.*
+import com.csm.kitchenguard.presentation.components.camera.CameraScaleScannerDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,6 +82,18 @@ fun WasteLoggingScreen(
     
     val ingredientsList by viewModel.ingredientsList.collectAsState()
 
+    var showScaleScannerDialog by remember { mutableStateOf(false) }
+
+    if (showScaleScannerDialog) {
+        CameraScaleScannerDialog(
+            onDismiss = { showScaleScannerDialog = false },
+            onWeightConfirmed = { reading ->
+                viewModel.onOcrCaptured(reading)
+                showScaleScannerDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,7 +113,10 @@ fun WasteLoggingScreen(
             HeaderSection()
 
             // Card Deteksi Timbangan (Viewfinder)
-            ScaleDetectionCard(viewModel)
+            ScaleDetectionCard(
+                viewModel = viewModel,
+                onOpenScaleScanner = { showScaleScannerDialog = true }
+            )
 
             // Section Pilih Bahan Baku
             SelectIngredientSection(uiState, viewModel, ingredientsList)
@@ -136,13 +157,17 @@ private fun TopBarM04(onNavigateBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(Color.White)
                         .clickable { onNavigateBack() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("👨‍🍳", fontSize = 20.sp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_kitchenguard_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.size(32.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
@@ -282,20 +307,24 @@ private fun HeaderSection() {
 // 2. Card Deteksi Timbangan (Viewfinder)
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
-private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
+private fun ScaleDetectionCard(
+    viewModel: WasteLoggingViewModel,
+    onOpenScaleScanner: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(200.dp),
+            .height(210.dp)
+            .clickable { onOpenScaleScanner() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkViewfinderBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Mock Viewfinder corners (Oranye)
+            // Viewfinder corners (Oranye)
             ViewfinderCorner(Modifier.align(Alignment.TopStart))
             ViewfinderCorner(Modifier.align(Alignment.TopEnd).padding(end = 4.dp, top = 4.dp))
             ViewfinderCorner(Modifier.align(Alignment.BottomStart).padding(start = 4.dp, bottom = 4.dp))
@@ -316,7 +345,7 @@ private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "DETECTED SCALE DISPLAY",
+                        text = "DETECTED SCALE DISPLAY (OCR)",
                         fontFamily = JetBrainsMonoFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 10.sp,
@@ -339,7 +368,7 @@ private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
                         text = displayWeight,
                         fontFamily = JetBrainsMonoFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 56.sp,
+                        fontSize = 54.sp,
                         color = ScaleTextGreen
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -347,7 +376,7 @@ private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
                         text = uiState.selectedUnit ?: "kg",
                         fontFamily = JetBrainsMonoFamily,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         color = ScaleTextGreen,
                         modifier = Modifier.padding(bottom = 10.dp)
                     )
@@ -355,41 +384,78 @@ private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
                 
                 Spacer(modifier = Modifier.height(2.dp))
                 
-                // Confidence & Tare
+                // Confidence & Auto-fill status per PRD 8.7
                 val ocrConfidence = uiState.ocrConfidence
-                val confidenceText = if (uiState.ocrConfidenceAvailable && ocrConfidence != null) {
-                    String.format("Confidence: %.1f%% • Tare 0.00kg", ocrConfidence * 100)
-                } else {
-                    "Confidence: N/A • Tare 0.00kg"
+                val statusText = when {
+                    uiState.ocrConfidenceAvailable && ocrConfidence != null -> {
+                        if (ocrConfidence >= 0.90f) {
+                            String.format("Confidence: %.1f%% • Auto-Fill Terverifikasi", ocrConfidence * 100)
+                        } else {
+                            String.format("Confidence: %.1f%% • Konfirmasi Manual Diperlukan", ocrConfidence * 100)
+                        }
+                    }
+                    uiState.ocrWeight != null -> "Input Terdeteksi • Ketuk untuk Timbang Ulang"
+                    else -> "Ketuk layar / tombol untuk buka Kamera OCR"
                 }
                 Text(
-                    text = confidenceText,
+                    text = statusText,
                     fontFamily = JetBrainsMonoFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 10.sp,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = if (ocrConfidence != null && ocrConfidence < 0.90f) {
+                        StatusWarning
+                    } else {
+                        Color.White.copy(alpha = 0.8f)
+                    }
                 )
             }
 
-            // Bottom Buttons
+            // Bottom Action Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Timbang Ulang
+                // Tombol Buka Kamera OCR
+                Surface(
+                    shape = RoundedCornerShape(50.dp),
+                    color = PrimaryOrange,
+                    modifier = Modifier.clickable { onOpenScaleScanner() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (uiState.ocrWeight != null) "Timbang Ulang (OCR)" else "Pindai Kamera OCR",
+                            fontFamily = InterFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+                
+                // Reset / Manual
                 Surface(
                     shape = RoundedCornerShape(50.dp),
                     color = Color.White.copy(alpha = 0.2f),
                     modifier = Modifier.clickable { 
-                        // Clear OCR data dan trigger ulang scan
                         viewModel.onOcrCaptured("", 0.0)
                     }
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -398,36 +464,9 @@ private fun ScaleDetectionCard(viewModel: WasteLoggingViewModel) {
                             tint = Color.White,
                             modifier = Modifier.size(14.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Timbang Ulang",
-                            fontFamily = InterFontFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 11.sp,
-                            color = Color.White
-                        )
-                    }
-                }
-                
-                // Flash
-                Surface(
-                    shape = RoundedCornerShape(50.dp),
-                    color = Color.White.copy(alpha = 0.2f),
-                    modifier = Modifier.clickable { /* action */ }
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.FlashOn,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Flash",
+                            text = "Reset",
                             fontFamily = InterFontFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 11.sp,
@@ -559,9 +598,9 @@ private fun SelectIngredientSection(
         Spacer(modifier = Modifier.height(12.dp))
         
         // Horizontal Chips - Dynamic list from DB
-        LazyColumn(
+        LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(ingredientsList.size) { index ->
                 val ingredient = ingredientsList[index]
@@ -833,6 +872,8 @@ private fun FinancialLossCard(uiState: WasteFormUiState) {
 // ─────────────────────────────────────────────────────────────────────────────
 // 6. Tombol Aksi Bawah
 // ─────────────────────────────────────────────────────────────────────────────
+// 5. Action Footer Section
+// ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun ActionFooterSection(
     uiState: WasteFormUiState, 
@@ -845,14 +886,17 @@ private fun ActionFooterSection(
             .padding(top = 24.dp, start = 16.dp, end = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Tombol AI Freshness Camera - Dapat diakses langsung sebelum submit per PRD 8.4
         Button(
             onClick = onNavigateToAiVerification,
-            enabled = !uiState.isSubmitting && uiState.submitSuccess,
+            enabled = !uiState.isSubmitting,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (uiState.aiClass != null) StatusSuccess else PrimaryOrange
+            ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
         ) {
             Row(
@@ -860,26 +904,35 @@ private fun ActionFooterSection(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (uiState.isSubmitting) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White
+                if (uiState.aiClass != null) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Menyimpan...",
+                        text = "Mutu AI: ${uiState.aiClass} ${if (uiState.isAiUncertain) "(Observasi Manual)" else ""}",
                         fontFamily = InterFontFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
+                        fontSize = 14.sp
                     )
-                } else if (uiState.submitSuccess) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Simpan Berhasil",
+                        text = "• Pindai Ulang",
                         fontFamily = InterFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
+                        fontSize = 11.sp,
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                 } else {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCamera,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Verifikasi Mutu via AI Kamera",
                         fontFamily = InterFontFamily,
@@ -929,7 +982,21 @@ private fun ActionFooterSection(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Mengirim Data...",
+                        text = "Menyimpan Data Waste...",
+                        fontFamily = InterFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
+                } else if (uiState.submitSuccess) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Tersimpan Lokal & Siap Sinkron",
                         fontFamily = InterFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
@@ -1029,6 +1096,10 @@ private fun WasteLoggingScreenPreview() {
                 ingredientId: Long
             ): kotlinx.coroutines.flow.Flow<List<com.csm.kitchenguard.data.local.entity.BatchEntity>> =
                 kotlinx.coroutines.flow.flowOf(emptyList())
+
+            override suspend fun getActiveBatchesOnce(
+                ingredientId: Long
+            ): List<com.csm.kitchenguard.data.local.entity.BatchEntity> = emptyList()
         }
         val fakeShiftDao = object : com.csm.kitchenguard.data.local.dao.ShiftDao {
             override suspend fun insertOrUpdateActiveShift(
